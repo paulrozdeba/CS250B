@@ -16,6 +16,7 @@ def main():
     test_data = np.loadtxt('../dataset/1571/test_npcomp.dat', dtype='float')
     
     # save first half as training data, second half as validation data
+    D = train_data.shape[1]
     N_trainex = train_data.shape[0]
     if N_trainex%2 == 0:
         N_trainex = int(N_trainex/2)
@@ -28,15 +29,23 @@ def main():
     N_validex = valid_data.shape[0]
     N_testex = test_data.shape[0]
     
-    train_data = dr.preprocess(train_data)
-    valid_data = dr.preprocess(valid_data)
+    train_data, tdmean, tdstd = dr.preprocess(train_data, full_output=True)
+    valid_data = dr.preprocess(valid_data, rescale=False)
+    test_data = dr.preprocess(test_data, rescale=False)
+    
+    # rescale validation and test sets same as training data
+    valid_data[:,1:-1] -= np.resize(tdmean, (N_validex,D-1))
+    valid_data[:,1:-1] /= tdstd
+    test_data[:,1:-1] -= np.resize(tdmean, (N_testex,D-1))
+    test_data[:,1:-1] /= tdstd
     
     # Search over values of mu (the regularization scale)
     mu_vec = np.array([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0])
     LCL_valid_vec = np.zeros(mu_vec.shape[0])
-    N_mutestiter = 1
+    N_mutestiter = 4
     
     for ind_mutestiter in range(N_mutestiter):
+        print mu_vec
         for ind_mu in range(mu_vec.shape[0]):
             # note: optimal product lr*mu based on empirical observation
             mu = mu_vec[ind_mu]  # regularization scale
@@ -71,12 +80,35 @@ def main():
                                mu_max*10^4, mu_max*10^5, mu_max*10^6])
         else:
             # Optimal value appeared in tested array.  Zoom in, enhance.
-            mu_vec = np.array([mu_max/9.0, mu_max/6.0, mu_max/3.0, mu_max, 
-                               mu_max*3.0, mu_max*6.0, mu_max*9.0])
+            newmu_max = mu_vec[LCL_max_ind + 1]
+            newmu_min = mu_vec[LCL_max_ind - 1]
+            upscale = (newmu_max / mu_max) / 3.0
+            downscale = (newmu_min / mu_max) * 3.0
+            
+            mu_vec = np.array([mu_max*downscale/3.0, mu_max*downscale/2.0, 
+                               mu_max*downscale, mu_max, mu_max*upscale, 
+                               mu_max*upscale*2.0, mu_max*upscale*3.0])
         
         print LCL_valid_vec
+        print ''
     
-    return trained_pars, mu_max, .00005/mu_max
+    lr_max = .00005/mu_max
+    print 'Final result:'
+    print '    mu = ' + str(mu_max)
+    print '    lr = ' + str(lr_max)
+    print '    LCL = ' + str(LCL_max) + ' (on validation set)\n'
+    
+    # calculate error rate on test data set
+    errors = 0
+    for ind_ex in range(N_testex):
+        if logistic(trained_pars, test_data[ind_ex,1:]) >= 0.5:
+            errors += 1 - test_data[ind_ex,0]
+        else:
+            errors += test_data[ind_ex,0]
+    error_rate = errors/N_testex
+    print 'Error rate on test data = ' + str(error_rate*100) + '%\n'
+    
+    return trained_pars, mu_max, .00005/lr_max
     
     """
     # saving and plotting arrays

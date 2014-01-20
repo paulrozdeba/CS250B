@@ -89,7 +89,7 @@ def preprocess(data, mydtype='float', rescale=True, full_output=False):
         data[:,1:-1] /= data_std
     
     if full_output == True:
-        return data, data_mean, data_var
+        return data, data_mean, data_std
     else:
         return data
 
