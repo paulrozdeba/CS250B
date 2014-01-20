@@ -50,7 +50,7 @@ def make_npcomp(traindata_loc, testdata_loc, mydtype='float'):
     # now save the compatible arrays to file
     if mydtype == 'float':
         np.savetxt(traindata_loc+'_npcomp.dat', train_data)
-        np.savetxt(testdata_loc+'npcomp.dat', test_data)
+        np.savetxt(testdata_loc+'_npcomp.dat', test_data)
     elif mydtype == 'int':
         np.savetxt(traindata_loc+'_npcomp.dat', train_data, fmt='%i')
         np.savetxt(testdata_loc+'_npcomp.dat', test_data, fmt='%i')
