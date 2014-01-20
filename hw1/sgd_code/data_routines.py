@@ -84,7 +84,7 @@ def preprocess(data, mydtype='float', rescale=True, full_output=False):
     # don't use last trait, which is always 1, since it has no variance
     if rescale == True:
         data_mean = np.mean(data[:,1:-1], axis=0)
-        data_var = np.std(data[:,1:-1], axis=0)
+        data_std = np.std(data[:,1:-1], axis=0)
         data[:,1:-1] -= np.resize(data_mean, (N_ex,D-1))
         data[:,1:-1] /= data_std
     
