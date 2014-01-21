@@ -1,2 +1,4 @@
 *.png
+*.pdf
 *.pyc
+opt_results.txt
