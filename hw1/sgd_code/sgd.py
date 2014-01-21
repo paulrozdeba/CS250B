@@ -1,141 +1,11 @@
 """
 sgd.py
 
-Implements stochastic gradient descent to train a logistic model conditional 
-likelihood.  Outputs the trained parameters plus, optionally, the full time 
-series of parameter values and the LCL at the end of each epoch of training.
+Functions that define the LCL, as well as the SGD and grid search procedures, 
+specifically implemented for the logistic probability model
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-import data_routines as dr
-
-def main():
-    # load the data and preprocess it
-    train_data = np.loadtxt('../dataset/1571/train_npcomp.dat', dtype='float')
-    test_data = np.loadtxt('../dataset/1571/test_npcomp.dat', dtype='float')
-    
-    # save first half as training data, second half as validation data
-    D = train_data.shape[1]
-    N_trainex = train_data.shape[0]
-    if N_trainex%2 == 0:
-        N_trainex = int(N_trainex/2)
-    else:
-        N_trainex = int(N_trainex/2)+1
-    valid_data = train_data[N_trainex:]
-    train_data = train_data[:N_trainex]
-    
-    N_trainex = train_data.shape[0]
-    N_validex = valid_data.shape[0]
-    N_testex = test_data.shape[0]
-    
-    train_data, tdmean, tdstd = dr.preprocess(train_data, full_output=True)
-    valid_data = dr.preprocess(valid_data, rescale=False)
-    test_data = dr.preprocess(test_data, rescale=False)
-    
-    # rescale validation and test sets same as training data
-    valid_data[:,1:-1] -= np.resize(tdmean, (N_validex,D-1))
-    valid_data[:,1:-1] /= tdstd
-    test_data[:,1:-1] -= np.resize(tdmean, (N_testex,D-1))
-    test_data[:,1:-1] /= tdstd
-    
-    # Search over values of mu (the regularization scale)
-    mu_vec = np.array([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0])
-    LCL_valid_vec = np.zeros(mu_vec.shape[0])
-    N_mutestiter = 4
-    
-    for ind_mutestiter in range(N_mutestiter):
-        print mu_vec
-        for ind_mu in range(mu_vec.shape[0]):
-            # note: optimal product lr*mu based on empirical observation
-            mu = mu_vec[ind_mu]  # regularization scale
-            lr = .00005/mu  # learning rate
-            
-            print 'mu = ' + str(mu)
-            print 'lr = ' + str(lr)
-            
-            # get trained parameter values
-            trained_pars = sgd_train(train_data, lr, mu, full_output=False)
-            # save to file
-            #np.save('pars_traj.npy', pars_traj)
-            
-            # now compute LCL over validation set
-            LCL_valid = LCL(trained_pars, valid_data)
-            LCL_valid_vec[ind_mu] = LCL_valid
-        
-        # find optimal value, zoom in around it
-        LCL_max = np.amax(LCL_valid_vec)
-        LCL_max_ind = np.argmax(LCL_valid_vec)
-        mu_max = mu_vec[LCL_max_ind]
-        
-        if LCL_max_ind == 0:
-            # Optimal value is somewhere below the smallest tested mu, so look 
-            # at several smaller orders of magnitude.
-            mu_vec = np.array([mu_max/10^6, mu_max/10^5, mu_max/10^4, 
-                               mu_max/10^3, mu_max/10^2, mu_max/10, mu_max])
-        elif LCL_max_ind == (mu_vec.shape[0]-1):
-            # Optimal value is somewhere above largest tested mu, so look at 
-            # several larger orders of magnitude
-            mu_vec = np.array([mu_max, mu_max*10, mu_max*10^2, mu_max*10^3, 
-                               mu_max*10^4, mu_max*10^5, mu_max*10^6])
-        else:
-            # Optimal value appeared in tested array.  Zoom in, enhance.
-            newmu_max = mu_vec[LCL_max_ind + 1]
-            newmu_min = mu_vec[LCL_max_ind - 1]
-            upscale = (newmu_max / mu_max) / 3.0
-            downscale = (newmu_min / mu_max) * 3.0
-            
-            mu_vec = np.array([mu_max*downscale/3.0, mu_max*downscale/2.0, 
-                               mu_max*downscale, mu_max, mu_max*upscale, 
-                               mu_max*upscale*2.0, mu_max*upscale*3.0])
-        
-        print LCL_valid_vec
-        print ''
-    
-    lr_max = .00005/mu_max
-    print 'Final result:'
-    print '    mu = ' + str(mu_max)
-    print '    lr = ' + str(lr_max)
-    print '    LCL = ' + str(LCL_max) + ' (on validation set)\n'
-    
-    # calculate error rate on test data set
-    errors = 0
-    for ind_ex in range(N_testex):
-        if logistic(trained_pars, test_data[ind_ex,1:]) >= 0.5:
-            errors += 1 - test_data[ind_ex,0]
-        else:
-            errors += test_data[ind_ex,0]
-    error_rate = errors/N_testex
-    print 'Error rate on test data = ' + str(error_rate*100) + '%\n'
-    
-    return trained_pars, mu_max, .00005/lr_max
-    
-    """
-    # saving and plotting arrays
-    # plot some parameter trajectory
-    print 'plotting parameter trajectory'
-    fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
-    ax.plot(pars_traj[:,0])
-    fig.savefig('testtraj_par.png')
-    
-    # plot LCL trajectory
-    print 'calculating LCL time series'
-    LCL_ts = np.zeros(pars_traj.shape[0]/N_trainex + 1)
-    ns = 0
-    for step in pars_traj[::N_trainex]:
-        LCL_ts[ns] = LCL(step, train_data)
-        ns += 1
-    
-    print 'plotting LCL time series'
-    fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
-    ax.plot(LCL_ts)
-    fig.savefig('testtraj_LCL.png')
-    plt.close(fig)
-    """
-
-################################################################################
 
 def sgd_train(train_data, lr, mu, x0=None, full_output=False):
     """
@@ -213,6 +83,89 @@ def sgd_train(train_data, lr, mu, x0=None, full_output=False):
     else:
         return trained_pars
 
+def mu_gridsearch(train_data, valid_data, mu_vec=None, N_mutestiter=4, lrmu=.00005):
+    """
+    Function mu_gridsearch.
+    
+    Perform a search over values of mu, the regularization scale, for the value 
+    which maximized the LCL of a trained model when applied to a validation 
+    set.
+    """
+    
+    # define intial mu and LCL vectors, as well as # of iterations.
+    if mu_vec == None:
+        mu_vec = np.array([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0])
+    LCL_valid_vec = np.zeros(mu_vec.shape[0])
+    
+    # Start searching over mu values.  The algorithm will continuously zoom in 
+    # near optimal mu values for N_mutestiter iterations.
+    for ind_mutestiter in range(N_mutestiter):
+        print 'Searching over mu values:'
+        print mu_vec
+        
+        # need an array to store trained parameter values
+        trained_pars_vec = np.zeros(shape=(mu_vec.shape[0],train_data.shape[1]-1))
+        
+        for ind_mu in range(mu_vec.shape[0]):
+            # note: optimal product lr*mu based on empirical observation
+            mu = mu_vec[ind_mu]  # regularization scale
+            lr = lrmu/mu  # learning rate
+            
+            print 'mu = ' + str(mu)
+            print 'lr = ' + str(lr)
+            
+            # get trained parameter values
+            trained_pars_vec[ind_mu] = sgd_train(train_data, lr, mu, full_output=False)
+            # save to file
+            #np.save('pars_traj.npy', pars_traj)
+            
+            # now compute LCL over validation set
+            LCL_valid = LCL(trained_pars_vec[ind_mu], valid_data)
+            LCL_valid_vec[ind_mu] = LCL_valid
+        
+        # extract optimal values
+        LCL_max = np.amax(LCL_valid_vec)
+        LCL_max_ind = np.argmax(LCL_valid_vec)
+        mu_max = mu_vec[LCL_max_ind]
+        trained_pars = trained_pars_vec[LCL_max_ind]
+        
+        if ind_mutestiter < N_mutestiter-1:
+            if LCL_max_ind == 0:
+                # Optimal value is somewhere below the smallest tested mu, so 
+                # look at several smaller orders of magnitude.
+                mu_vec = np.array([mu_max/10^6, mu_max/10^5, mu_max/10^4, 
+                                   mu_max/10^3, mu_max/10^2, mu_max/10, mu_max])
+            elif LCL_max_ind == (mu_vec.shape[0]-1):
+                # Optimal value is somewhere above largest tested mu, so look at 
+                # several larger orders of magnitude
+                mu_vec = np.array([mu_max, mu_max*10, mu_max*10^2, mu_max*10^3, 
+                                   mu_max*10^4, mu_max*10^5, mu_max*10^6])
+            else:
+                # Optimal value appeared in tested array.  Zoom in, enhance.
+                newmu_max = mu_vec[LCL_max_ind + 1]
+                newmu_min = mu_vec[LCL_max_ind - 1]
+                us = (newmu_max / mu_max)
+                ds = (newmu_min / mu_max)
+            
+                mu_vec = np.array([mu_max * ds, 
+                                   mu_max * ds**(2.0/3.0), 
+                                   mu_max * ds**(1.0/3.0), 
+                                   mu_max, 
+                                   mu_max * us**(1.0/3.0), 
+                                   mu_max * us**(2.0/3.0),
+                                   mu_max * us])
+        
+        print LCL_valid_vec
+        print ''
+    
+    lr_max = lrmu/mu_max
+    print 'Final result:'
+    print '    mu = ' + str(mu_max)
+    print '    lr = ' + str(lr_max)
+    print '    LCL = ' + str(LCL_max) + ' (on validation set)\n'
+    
+    return trained_pars, mu_max, lr_max, LCL_max
+
 def LCL(beta, x):
     """
     Computes LCL for a data set x, where x has shape (# examples, # dimensions 
@@ -245,6 +198,3 @@ def logistic(beta, x):
     Logistic function when beta and x are vectors.
     """
     return 1.0 / (1.0 + np.exp(-np.einsum('i,i', beta,x)))
-
-if __name__ == '__main__':
-    main()
