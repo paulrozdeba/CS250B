@@ -1,4 +1,6 @@
+*.npy
 *.png
 *.pdf
 *.pyc
 opt_results.txt
+run_sgd_?.py

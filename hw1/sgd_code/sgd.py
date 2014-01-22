@@ -133,13 +133,13 @@ def mu_gridsearch(train_data, valid_data, mu_vec=None, N_mutestiter=4, lrmu=.000
             if LCL_max_ind == 0:
                 # Optimal value is somewhere below the smallest tested mu, so 
                 # look at several smaller orders of magnitude.
-                mu_vec = np.array([mu_max/10^6, mu_max/10^5, mu_max/10^4, 
-                                   mu_max/10^3, mu_max/10^2, mu_max/10, mu_max])
+                mu_vec = np.array([mu_max/10**6, mu_max/10**5, mu_max/10**4, 
+                                   mu_max/10**3, mu_max/10**2, mu_max/10, mu_max])
             elif LCL_max_ind == (mu_vec.shape[0]-1):
                 # Optimal value is somewhere above largest tested mu, so look at 
                 # several larger orders of magnitude
-                mu_vec = np.array([mu_max, mu_max*10, mu_max*10^2, mu_max*10^3, 
-                                   mu_max*10^4, mu_max*10^5, mu_max*10^6])
+                mu_vec = np.array([mu_max, mu_max*10, mu_max*10**2, mu_max*10**3, 
+                                   mu_max*10**4, mu_max*10**5, mu_max*10**6])
             else:
                 # Optimal value appeared in tested array.  Zoom in, enhance.
                 newmu_max = mu_vec[LCL_max_ind + 1]
