@@ -13,7 +13,7 @@ import data_routines as dr
 import sgd
 
 def main():
-    N_samples = 250
+    N_samples = 1
     results = np.zeros(shape=(N_samples, 6))
     
     for i in range(N_samples):
@@ -115,7 +115,7 @@ def plot_pars(par_traj, compts, fname_ts=None, fname_ep=None):
         ax.set_xlim((0,par_traj.shape[0]))
         ax.set_title('Sample parameter trajectory')
         ax.set_xlabel('Step number')
-        ax.set_ylabel(r'$\beta_' + str(c) + '$')
+        ax.set_ylabel(r'$\beta_{' + str(c) + '}$')
         if fname_ts == None:
             fname = 'beta' + str(c) + '_traj_ts.pdf'
         else:
@@ -133,7 +133,7 @@ def plot_pars(par_traj, compts, fname_ts=None, fname_ep=None):
         ax.set_xlim((0,par_traj[::N_trainex].shape[0]))
         ax.set_title('Sample parameter trajectory')
         ax.set_xlabel('Epoch number')
-        ax.set_ylabel(r'$\beta_' + str(c) + '$')
+        ax.set_ylabel(r'$\beta_{' + str(c) + '}$')
         if fname_ep == None:
             fname = 'beta' + str(c) + '_traj_ep.pdf'
         else:
