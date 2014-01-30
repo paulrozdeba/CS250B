@@ -55,7 +55,7 @@ def sgd_train(train_data, lr, mu, x0=None, full_output=False):
                 step = lr*((y_rand - p_rand)*x_rand - 2.0*mu*traj[ns])
                 traj.append(traj[ns] + step)
                 ns += 1
-            LCL1 += LCL(traj[ns-1], train_data)
+            LCL1 += LCL_reg(traj[ns-1], train_data, mu)
             nep += 1
         # loop over second N_testepoch epochs
         for i in range(N_testepoch/2):
@@ -67,12 +67,12 @@ def sgd_train(train_data, lr, mu, x0=None, full_output=False):
                 step = lr*((y_rand - p_rand)*x_rand - 2.0*mu*traj[ns])
                 traj.append(traj[ns] + step)
                 ns += 1
-            LCL2 += LCL(traj[ns-1], train_data)
+            LCL2 += LCL_reg(traj[ns-1], train_data, mu)
             nep += 1
         
         if abs((LCL2 - LCL1)/LCL1) < 1e-3:
             print 'Converged after ' + str(nep) + ' epochs!'
-            print 'LCL = ' + str(LCL(traj[ns-1], train_data)) + '\n'
+            print 'LCL = ' + str(LCL_reg(traj[ns-1], train_data, mu)) + '\n'
             converged = True
     
     traj = np.array(traj)
