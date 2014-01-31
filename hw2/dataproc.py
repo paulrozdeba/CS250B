@@ -15,6 +15,8 @@ def import_sentences(path_to_file):
     for line in f:
         a = line.replace('\n','')
         b = a.split()
+        b += ['LASTWORD']
+        b[:0] = ['FIRSTWORD']
         sentences.append(b)
     f.close()
     return sentences
