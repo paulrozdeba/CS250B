@@ -11,7 +11,7 @@ def g(f, w, tags, x):
     """
     Calculates g functions for each pair of tags y in a sentence x.
     
-    f - List of low-level feature functions over which to evaluate g.
+    f - The "meta" feature function.
     w - List of weights associated with ffs.
     y - The set of possible tags.
     x - Sequence (sentence) over which to evaluate g.
@@ -27,11 +27,8 @@ def g(f, w, tags, x):
     N = len(x)  # length of sentence
     g = np.zeros(shape=(N-1,M,M))
     
-    # outer loops goes over sentence
-    for i in range(N-1):
-        # inner loop covers all possible tag pairs
-        for (j,tag1),(k,tag2),(weight,func) in it.product(enumerate(tags),enumerate(tags),zip(w,f)):
-            g[i,j,k] += weight * func(tag1,tag2,x,i)
+    for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range(N-1),enumerate(tags),enumerate(tags),enumerate(w)):
+        g[i,k1,k2] += weight * f(tag1,tag2,x,i,j)
     
     return g
 
