@@ -37,6 +37,33 @@ def _g(f, w, tags, x):
     
     return g
 
+def forward(e_g,k,v):
+    """
+    e_g is the g array exponentiated, k is the current index in the tag sequence
+    and v is the y_i
+    """
+    if(k==0):
+        return(v==0)
+    else:
+        total = 0
+        for i in range(8):
+            total += float(forward(e_g,k-1,i))*e_g[k,i,v]
+        return total
+
+def backward(e_g,v,k):
+    """
+    e_g is the g array exponentiated, k is the current index in the tag sequence
+    and v is the y_(i-1)
+    """
+    length = e_g.shape[0]-1
+    if(k==length):
+        return(v==1)
+    else:
+        total = 0
+        for i in range(8):
+            total += float(backward(e_g,i,k+1))*e_g[k+1,v,i]
+        return total
+
 def U(g):
     """
     Calculates the matrix elements of the propagator U(k,v).
