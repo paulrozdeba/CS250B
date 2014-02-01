@@ -22,7 +22,6 @@ def g(f, w, tags, x):
     
     M = len(tags)  # number of possible tags
     assert(M == len(x))  # just making sure things are in order
-    assert(len(f) == len(w))
     
     N = len(x)  # length of sentence
     g = np.zeros(shape=(N-1,M,M))
