@@ -22,17 +22,17 @@ def g(f, w, tags, x):
     
     M = len(tags)  # number of possible tags
     N = len(x)  # length of sentence
-    g = np.zeros(shape=(N-1,M,M))
+    __g__ = np.zeros(shape=(N-1,M,M))
     
     for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range((1,N)),enumerate(tags),enumerate(tags),enumerate(w)):
         if i == 1: 
-            g[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
+            __g__[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
         elif i == (N-1):
-            g[i-1,k1,k2] += weight * f(tag1,'STOP',x,i,j)
+            __g__[i-1,k1,k2] += weight * f(tag1,'STOP',x,i,j)
         else:
-            g[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
+            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
     
-    return g
+    return __g__
 
 def forward(e_g, k, v):
     """
@@ -61,7 +61,7 @@ def backward(e_g, v, k):
             total += float(backward(e_g,i,k+1))*e_g[k+1,v,i]
         return total
 
-def U(g):
+def U(g, k):
     """
     Calculates the matrix elements of the propagator U(k,v).
     
@@ -70,10 +70,17 @@ def U(g):
     
     N = g.shape[0]  # length of sentence x
     M = g.shape[1]  # number of possible tags
-    U = np.zeros(shape=(N,M))
+    __U__ = np.zeros(shape=(N,M))
     
     # first calculate base case
-    U[0,:] = np.amax(g[0])
+    __U__[0,:] = np.amax(g[0], axis=0)
+    
+    # now implement the recursion
+    if k == 0:
+        return __U__[0,:]
+    else:
+        return np.amax(U(g,k-1) + g[k], axis=0)
+        
     
 
 
