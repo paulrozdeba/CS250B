@@ -7,11 +7,9 @@ Contains several routines
 import numpy as np
 import itertools as it
 
-def _g(f, w, tags, x):
+def g(f, w, tags, x):
     """
     Calculates g functions for each pair of tags y in a sentence x.
-    This is NOT something the user should be calling, hence the _g designation.
-    Rather, this will be called by U, alpha, beta, etc.
     
     f - List of low-level feature functions over which to evaluate g.
     w - List of weights associated with ffs.
