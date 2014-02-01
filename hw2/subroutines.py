@@ -26,11 +26,11 @@ def g(f, w, tags, x):
     
     for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range((1,N)),enumerate(tags),enumerate(tags),enumerate(w)):
         if i == 1: 
-            g[i,k1,k2] += weight * f('START',tag2,x,i,j)
+            g[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
         elif i == (N-1):
-            g[i,k1,k2] += weight * f(tag1,'STOP',x,i,j)
+            g[i-1,k1,k2] += weight * f(tag1,'STOP',x,i,j)
         else:
-            g[i,k1,k2] += weight * f(tag1,tag2,x,i,j)
+            g[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
     
     return g
 
