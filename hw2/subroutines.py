@@ -61,7 +61,7 @@ def backward(e_g, v, k):
             total += float(backward(e_g,i,k+1))*e_g[k+1,v,i]
         return total
 
-def U(g, k):
+def U(g):
     """
     Calculates the matrix elements of the propagator U(k,v).
     
@@ -72,16 +72,21 @@ def U(g, k):
     M = g.shape[1]  # number of possible tags
     __U__ = np.zeros(shape=(N,M))
     
-    # first calculate base case
-    __U__[0,:] = np.amax(g[0], axis=0)
+    for i in range(N):
+        __U__[i] = __U_singlek__(g,i)
     
-    # now implement the recursion
-    if k == 0:
-        return __U__[0,:]
-    else:
-        return np.amax(U(g,k-1) + g[k], axis=0)
+    return __U__
         
+def __U_singlek__(g, k):
+    """
+    Supplementary function, for use inside U(g) only.
+    """
     
+    # implement recursion here
+    if k == 0:
+        return np.amax(g[0], axis=0)
+    else:
+        return np.amax(__U_singlek__(g,k-1) + g[k], axis=0)
 
 
 
