@@ -34,32 +34,58 @@ def g(f, w, tags, x):
     
     return __g__
 
-def forward(e_g, k, v):
+def forward(e_g, k, v,alpha_mat):
     """
     e_g is the g array exponentiated, k is the current index in the tag sequence
     and v is the y_i
     """
     if(k==0):
-        return(v==0)
+        total = (v==0)
     else:
         total = 0
-        for i in range(8):
-            total += float(forward(e_g,k-1,i))*e_g[k,i,v]
-        return total
+        for i in range(e_g.shape[1]):
+            total += float(forward(e_g,k-1,i,alpha_mat))*e_g[k,i,v]
+    return total
 
-def backward(e_g, v, k):
+def backward(e_g, v, k,beta_mat):
     """
     e_g is the g array exponentiated, k is the current index in the tag sequence
     and v is the y_(i-1)
     """
     length = e_g.shape[0]-1
     if(k==length):
-        return(v==1)
+        total = (v==1)
     else:
         total = 0
-        for i in range(8):
-            total += float(backward(e_g,i,k+1))*e_g[k+1,v,i]
-        return total
+        for i in range(e_g.shape[1]):
+            total += float(backward(e_g,i,k+1,beta_mat))*e_g[k+1,v,i]
+    return total
+    
+def alpha_mat(g):
+    e_g = np.exp(g)
+    N = e_g.shape[0] + 1
+    M = e_g.shape[1]
+    alpha_mat = np.zeros((N,M))
+    for k in range(N):
+        for v in range(M):
+            if (k==0):
+                alpha_mat[k,v] = float((v==0))
+            else:
+                alpha_mat[k,v] = np.dot(alpha_mat[k-1,:],e_g[k-1,:,v])
+    return alpha_mat
+     
+def beta_mat(g):
+    e_g = np.exp(g)
+    N = e_g.shape[0] + 1
+    M = e_g.shape[1]
+    beta_mat = np.zeros((N,M))
+    for k in range(N)[::-1]:
+        for u in range(M):
+            if (k==(N-1)):
+                beta_mat[k,u] = float((u==1))
+            else:
+                beta_mat[k,u] = np.dot(beta_mat[k+1,:],e_g[k,u,:]) 
+    return beta_mat
 
 def U(g):
     """
@@ -88,7 +114,10 @@ def __U_singlek__(g, k):
     else:
         return np.amax(__U_singlek__(g,k-1) + g[k], axis=0)
 
-
+def Z(w,x):
+    Z = 0.0
+    
+    
 
 
 
