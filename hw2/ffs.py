@@ -11,10 +11,43 @@ for computing forward/backward vectors, etc.
 
 import numpy as np
 
-def indicator(data, test):
+def metaff(tag1, tag2, x, i, j):
     """
-    Function indicator.
+    This is the feature function you interact with.
+    tag1, tag2 - The tag pair over which to evaluate a feature function.
+    x - The sentence on which to evaluate a ff.
+    i - Position in the sentence.
+    j - Label for the feature function.
+    """
     
+    tags = ['START','STOP','SPACE','PERIOD','COMMA','COLON','QUESTION_MARK',
+            'EXCLAMATION_PT']
+    suffixes = ['ing','ly']
+    prefixes = ['pre','post','de','inter','intra']
+    M = len(tags)
+    Nsuff = len(suffixes)
+    Npref = len(prefixes)
+    
+    # single tag indicator, first tag
+    if j >= 0 and j < M:
+        return __indicator__(tag1,tags[j])
+    # single tag indicator, second tag
+    elif j >= M and j < 2*M:
+        return __indicator__(tag2,tags[j])
+    # tag pair indicator
+    elif j >= 2*M and j < (M*M + 2*M):
+        return __indicator__(tag1,tags[int(j)/int(M)]) * __indicator__(tag2,tags[j%M])
+    # tag/prefix indicator
+    elif j >= (M*M + 2*M) and j < (M*M + 2*M + M*Npref):
+        return __indicator(tag1,tags[int(j)/int(M)]) * __indicator__(x[i],prefixes[j%Npref])
+    elif j >= (M*M + 2*M + M*Npref) and j < (M*M + 2*M + 2*M*Npref):
+        return __indicator(tag2,tags[int(j)/int(M)]) * __indicator__(x[i+1],prefixes[j%Npref])
+    else:
+        raise ValueError('Invalid feature function index number.')
+        
+
+def __indicator__(data, test):
+    """
     A simple Boolean indicator function on the two arguments, testing for 
     equality.  The inputs can either be individual strings or tuples/lists 
     of strings.
@@ -22,10 +55,8 @@ def indicator(data, test):
     
     return data == test
 
-def length(x):
+def __length__(x):
     """
-    Function length.
-    
     Computes and returns the length of a word or sentence.  If it's a word, 
     just pass it bare to the function.  If a sentence, you should pass it 
     already parsed into a list of words.
@@ -33,20 +64,16 @@ def length(x):
     
     return len(x)
 
-def word_suffix(x, suffix):
+def __word_suffix__(x, suffix):
     """
-    Function word_suffix.
-    
     A Boolean-valued function that returns whether or not the words in the 
     input sequence "x" end in the input "suffix".
     """
     
     return [word.endswith(suffix) for word in x]
 
-def word_prefix(x, prefix):
+def __word_prefix__(x, prefix):
     """
-    Function word_prefix
-    
     A Boolean-valued function that returns whether or not the words in the 
     input sequence "x" begin with the input "prefix".
     """

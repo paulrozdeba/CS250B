@@ -13,7 +13,7 @@ def g(f, w, tags, x):
     
     f - The "meta" feature function.
     w - List of weights associated with ffs.
-    tags - The set of possible tags, NOT including 'START' or 'STOP'!!!
+    tags - The set of possible tags.
     x - Sequence (sentence) over which to evaluate g.
     
     Returns: a (N-1) X M X M matrix where N is the length of the sentence, and 
@@ -25,12 +25,15 @@ def g(f, w, tags, x):
     __g__ = np.zeros(shape=(N-1,M,M))
     
     for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range((1,N)),enumerate(tags),enumerate(tags),enumerate(w)):
-        if i == 1: 
-            __g__[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
-        elif i == (N-1):
-            __g__[i-1,k1,k2] += weight * f(tag1,'STOP',x,i,j)
-        else:
-            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
+#        if i == 1:
+#            #__g__[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
+#            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j) * (tag1=='START')
+#        elif i == (N-1):
+#            #__g__[i-1,k1,k2] += weight * f(tag1,'STOP',x,i,j)
+#            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j) * (tag2=='STOP')
+#        else:
+#            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
+        __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
     
     return __g__
 
