@@ -15,7 +15,7 @@ def main():
     train_sentences = dp.import_sentences('dataset/trainingSentences.txt')
     
     # now run it
-    collins_epoch(train_labels, train_sentences, np.zeros(160))
+    collins_epoch(train_labels, train_sentences, np.random.random_sample(160))
 
 def collins_epoch(train_labels, train_sentences, w0):
     """
@@ -39,9 +39,11 @@ def collins_epoch(train_labels, train_sentences, w0):
     
     for nex,example in enumerate(train_sentences):
         # first, calculate g
-        g_ex = sr.g(metaff, w[nex], tags, example)
+        g_ex = sr.g(metaff, w0, tags, example)
         
-        print g_ex.shape
+        print nex, g_ex.shape
+        print np.count_nonzero(g_ex)
+        print g_ex[2]
 
 if __name__ == '__main__':
     main()

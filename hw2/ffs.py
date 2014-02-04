@@ -45,11 +45,11 @@ def metaff(tag1, tag2, x, i, j):
     elif j >= (M*M + 2*M) and j < (M*M + 2*M + M*Npref):
         ind1 = int(j-M*M-2*M)/int(M)
         ind2 = (j-M*M-2*M)%Npref
-        return __indicator__(tag1,tags[ind1]) * __indicator__(x[i-1],prefixes[ind2])
+        return __indicator__(tag1,tags[ind1]) * __word_prefix__(x[i-1],prefixes[ind2])[0]
     elif j >= (M*M + 2*M + M*Npref) and j < (M*M + 2*M + 2*M*Npref):
         ind1 = int(j-M*M-2*M-M*Npref)/int(M)
         ind2 = (j-M*M-2*M-M*Npref)%Npref
-        return __indicator__(tag2,tags[ind1]) * __indicator__(x[i],prefixes[ind2])
+        return __indicator__(tag2,tags[ind1]) * __word_prefix__(x[i],prefixes[ind2])[0]
     else:
         raise ValueError('Invalid feature function index number.')
         
