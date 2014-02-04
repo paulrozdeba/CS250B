@@ -13,6 +13,9 @@ def main():
     # first import the training data
     train_labels = dp.import_labels('dataset/trainingLabels.txt')
     train_sentences = dp.import_sentences('dataset/trainingSentences.txt')
+    
+    # now run it
+    collins_epoch(train_labels, train_sentences, np.zeros(160))
 
 def collins_epoch(train_labels, train_sentences, w0):
     """
@@ -24,7 +27,8 @@ def collins_epoch(train_labels, train_sentences, w0):
     w0 - The initial parameter values, at the start of the epoch.
     """
     
-    Ntrain = len(train_data)  # number of training examples
+    Ntrain = len(train_sentences)  # number of training examples
+    assert(Ntrain == len(train_labels))
     J = len(w0)  # number of parameters, equal to number of feature functions
     w = np.zeros(shape=(Ntrain,J))  # to store the parameter trajectory
     w[0] = w0
@@ -33,11 +37,11 @@ def collins_epoch(train_labels, train_sentences, w0):
     tags = ['START','STOP','SPACE','PERIOD','COMMA','COLON','QUESTION_MARK',
             'EXCLAMATION_PT']
     
-    for nex,example in enumerate(train_data):
+    for nex,example in enumerate(train_sentences):
         # first, calculate g
-        g_ex = sr.g(metaff, w[nex], tags, train_data[1])
+        g_ex = sr.g(metaff, w[nex], tags, example)
         
-        print g_ex
+        print g_ex.shape
 
 if __name__ == '__main__':
     main()

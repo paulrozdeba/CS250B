@@ -30,18 +30,26 @@ def metaff(tag1, tag2, x, i, j):
     
     # single tag indicator, first tag
     if j >= 0 and j < M:
-        return __indicator__(tag1,tags[j])
+        ind = j
+        return __indicator__(tag1,tags[ind])
     # single tag indicator, second tag
     elif j >= M and j < 2*M:
-        return __indicator__(tag2,tags[j])
+        ind = j-M
+        return __indicator__(tag2,tags[ind])
     # tag pair indicator
     elif j >= 2*M and j < (M*M + 2*M):
-        return __indicator__(tag1,tags[int(j)/int(M)]) * __indicator__(tag2,tags[j%M])
+        ind1 = int(j-2*M)/int(M)
+        ind2 = (j-2*M)%M
+        return __indicator__(tag1,tags[ind1]) * __indicator__(tag2,tags[ind2])
     # tag/prefix indicator
     elif j >= (M*M + 2*M) and j < (M*M + 2*M + M*Npref):
-        return __indicator(tag1,tags[int(j)/int(M)]) * __indicator__(x[i],prefixes[j%Npref])
+        ind1 = int(j-M*M-2*M)/int(M)
+        ind2 = (j-M*M-2*M)%Npref
+        return __indicator__(tag1,tags[ind1]) * __indicator__(x[i-1],prefixes[ind2])
     elif j >= (M*M + 2*M + M*Npref) and j < (M*M + 2*M + 2*M*Npref):
-        return __indicator(tag2,tags[int(j)/int(M)]) * __indicator__(x[i+1],prefixes[j%Npref])
+        ind1 = int(j-M*M-2*M-M*Npref)/int(M)
+        ind2 = (j-M*M-2*M-M*Npref)%Npref
+        return __indicator__(tag2,tags[ind1]) * __indicator__(x[i],prefixes[ind2])
     else:
         raise ValueError('Invalid feature function index number.')
         

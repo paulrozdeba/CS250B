@@ -24,7 +24,7 @@ def g(f, w, tags, x):
     N = len(x)  # length of sentence
     __g__ = np.zeros(shape=(N-1,M,M))
     
-    for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range((1,N)),enumerate(tags),enumerate(tags),enumerate(w)):
+    for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range(1,N),enumerate(tags),enumerate(tags),enumerate(w)):
 #        if i == 1:
 #            #__g__[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
 #            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j) * (tag1=='START')
