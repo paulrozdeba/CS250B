@@ -11,50 +11,65 @@ for computing forward/backward vectors, etc.
 
 import numpy as np
 
-def metaff(tag1, tag2, x, i, j):
+def sent_precheck(x):
+    """
+    Pre-checks a sentence x for word-level features.
+    
+    x - The ENTIRE sentence, as a list of words.
+    
+    Returns: x_info.
+    x_info is a list containing information about the sentence.
+    The zeroth entry is a NxD numpy array containing indices of True 
+    comparisons against dictionaries, like conjunctions, prefixes, suffixes, 
+    etc.
+    The first entry is the length of the sentence.
+    The second entry is "begins with interrogative" indicator.
+    """
+    
+    x_info = {}
+    
+    # Length of sentence.
+    x_info['length'] = length(x)
+    
+    # First check: capitalization.
+    # BLAH BLAH BLAH
+    
+    # now lowercase this shit
+    x = [word.lower for word in x]
+    
+    # First, define all word dictionaries.
+    conjunctions = [None, 'after', 'although', 'and', 'as', 'because', 'before', 
+                    'but', 'except', 'if', 'like', 'nor', 'now', 'once', 'or', 
+                    'since', 'so', 'than', 'that', 'though', 'unless', 'until', 
+                    'when', 'where', 'whether', 'while']
+    #suffixes = [None, 'ing', 'ly']
+    #prefixes = [None, 'pre', 'post', 'de', 'inter', 'intra']
+    
+    # Start the dictionary checks.
+    D = 1  # number of dictionaries.
+    x_yes = np.array(shape=(N,D))
+    
+    for i,word in enumerate(x):
+        # check conjunctions
+        if word in conjunctions:
+            x_yes[i,0] = x.index(word)
+        else:
+            x_yes[i,0] = 0
+    
+    x['dictchecks'] = x_yes
+    
+    return x_info
+
+def metaff(m1, m2, x_yes, i):
     """
     This is the feature function you interact with.
-    tag1, tag2 - The tag pair over which to evaluate a feature function.
-    x - The sentence on which to evaluate a ff.
-    i - Position in the sentence.
-    j - Label for the feature function.
+    m1, m2 - The indices of the tag pair over which to evaluate the ff's.
+    x_yes - Array of indices of word/sentence features.
+    i - Position in sentence.
     """
     
-    tags = ['START','STOP','SPACE','PERIOD','COMMA','COLON','QUESTION_MARK',
-            'EXCLAMATION_PT']
-    suffixes = ['ing','ly']
-    prefixes = ['pre','post','de','inter','intra']
-    M = len(tags)
-    Nsuff = len(suffixes)
-    Npref = len(prefixes)
-    
-    # single tag indicator, first tag
-    if j >= 0 and j < M:
-        ind = j
-        return __indicator__(tag1,tags[ind])
-    # single tag indicator, second tag
-    elif j >= M and j < 2*M:
-        ind = j-M
-        return __indicator__(tag2,tags[ind])
-    # tag pair indicator
-    elif j >= 2*M and j < (M*M + 2*M):
-        ind1 = int(j-2*M)/int(M)
-        ind2 = (j-2*M)%M
-        return __indicator__(tag1,tags[ind1]) * __indicator__(tag2,tags[ind2])
-    # tag/prefix indicator
-    elif j >= (M*M + 2*M) and j < (M*M + 2*M + M*Npref):
-        ind1 = int(j-M*M-2*M)/int(M)
-        ind2 = (j-M*M-2*M)%Npref
-        return __indicator__(tag1,tags[ind1]) * __word_prefix__(x[i-1],prefixes[ind2])[0]
-    elif j >= (M*M + 2*M + M*Npref) and j < (M*M + 2*M + 2*M*Npref):
-        ind1 = int(j-M*M-2*M-M*Npref)/int(M)
-        ind2 = (j-M*M-2*M-M*Npref)%Npref
-        return __indicator__(tag2,tags[ind1]) * __word_prefix__(x[i],prefixes[ind2])[0]
-    else:
-        raise ValueError('Invalid feature function index number.')
-        
 
-def __indicator__(data, test):
+def indicator(data, test):
     """
     A simple Boolean indicator function on the two arguments, testing for 
     equality.  The inputs can either be individual strings or tuples/lists 
@@ -63,16 +78,7 @@ def __indicator__(data, test):
     
     return data == test
 
-def __length__(x):
-    """
-    Computes and returns the length of a word or sentence.  If it's a word, 
-    just pass it bare to the function.  If a sentence, you should pass it 
-    already parsed into a list of words.
-    """
-    
-    return len(x)
-
-def __word_suffix__(x, suffix):
+def word_suffix(x, suffix):
     """
     A Boolean-valued function that returns whether or not the words in the 
     input sequence "x" end in the input "suffix".
@@ -80,10 +86,19 @@ def __word_suffix__(x, suffix):
     
     return [word.endswith(suffix) for word in x]
 
-def __word_prefix__(x, prefix):
+def word_prefix(x, prefix):
     """
     A Boolean-valued function that returns whether or not the words in the 
     input sequence "x" begin with the input "prefix".
     """
     
     return [word.startswith(prefix) for word in x]
+
+def length(x):
+    """
+    Computes and returns the length of a word or sentence.  If it's a word, 
+    just pass it bare to the function.  If a sentence, you should pass it 
+    already parsed into a list of words.
+    """
+    
+    return len(x)
