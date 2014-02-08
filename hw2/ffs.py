@@ -31,32 +31,62 @@ def sent_precheck(x):
     # Length of sentence.
     x_info['length'] = length(x)
     
-    # First check: capitalization.
-    # BLAH BLAH BLAH
-    
-    # now lowercase this shit
-    x = [word.lower for word in x]
     
     # First, define all word dictionaries.
     conjunctions = [None, 'after', 'although', 'and', 'as', 'because', 'before', 
                     'but', 'except', 'if', 'like', 'nor', 'now', 'once', 'or', 
                     'since', 'so', 'than', 'that', 'though', 'unless', 'until', 
                     'when', 'where', 'whether', 'while']
-    #suffixes = [None, 'ing', 'ly']
-    #prefixes = [None, 'pre', 'post', 'de', 'inter', 'intra']
+    suffixes = [None, 'ing', 'ly']
+    prefixes = [None, 'pre', 'post', 'de', 'inter', 'intra']
+    #store the size of these dictionaries for later book keeping
+    x_info['num_conjunctions'] = length(conjunctions)
+    x_info['num_suffixes'] = length(suffixes)
+    x_info['num_prefixes'] = length(prefixes)
     
-    # Start the dictionary checks.
-    D = 1  # number of dictionaries.
-    x_yes = np.array(shape=(N,D))
+    #allocate arrays for word level checks
+    x_conjunctions = np.zeros(length(x))
+    x_suffixes = np.zeros(length(x))
+    x_prefixes = np.zeros(length(x))
+    x_capitals = np.zeros(length(x))
+    
+    # First check: capitalization.
+    for i,word in enumerate(x):
+        if word[0].isupper():
+            x_capitals[i] = 1
+        else:
+            x_capitals[i] = 0
+    x_info['capitals'] = x_capitals
+
+    
+    # now lowercase this shit
+    x = [word.lower for word in x]
     
     for i,word in enumerate(x):
         # check conjunctions
         if word in conjunctions:
-            x_yes[i,0] = x.index(word)
+            x_conjunctions[i] = x.index(word)
         else:
-            x_yes[i,0] = 0
+            x_conjunctions[i] = 0
+    x_info['conjunctions'] = x_conjunctions
     
-    x_info['dictchecks'] = x_yes
+    #check prefixes
+    for i,word in enumerate(x):
+        for j in range(length(prefixes)):
+            if (word.startswith(prefixes[j+1])):
+                x_prefixes[i] = j+1
+                break
+    
+    x_info['prefixes'] = x_prefixes
+    
+    #check suffixes
+    for i,word in enumerate(x):
+        for j in range(length(suffixes)):
+            if (word.endswith(suffixes[j+1])):
+                x_suffixes[i] = j+1
+                break
+    
+    x_info['suffixes'] = x_suffixes
     
     return x_info
 
