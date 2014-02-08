@@ -56,18 +56,53 @@ def sent_precheck(x):
         else:
             x_yes[i,0] = 0
     
-    x['dictchecks'] = x_yes
+    x_info['dictchecks'] = x_yes
     
     return x_info
 
-def metaff(m1, m2, x_yes, i):
+def metaff(m1, m2, x_info, i):
     """
     This is the feature function you interact with.
+    
     m1, m2 - The indices of the tag pair over which to evaluate the ff's.
-    x_yes - Array of indices of word/sentence features.
+    x_info - Information about the sentence.
     i - Position in sentence.
+    
+    Returns a list of indices of the TRUE feature functions.
     """
     
+    # define the size of some spaces
+    M = 8  # number of possible tags
+    Np = x_info['Np']  # number of prefixes
+    Ns = x_info['Ns']  # number of suffixes
+    Nc = x_info['Nc']  # number of conjunctions
+    
+    trueFF = []  # container list for true FF meta-indices
+    
+    ############
+    # SINGLE TAG INDICATORS (STI)
+    STI1 = [m1]
+    STI2 = [m2]
+    
+    ############
+    # WORD-LEVEL DICTIONARY INDICATORS
+    PREFIX = x_info['pref_true']
+    SUFFIX = x_info['suff_true']
+    CONJUNCTION = x_info['conj_true']
+    CAPITALIZED = x_info['cap_true']
+    
+    ############################################################################
+    # Now let's look at pairwise-indicators
+    ############
+    # TAG PAIR INDICATOR (TPI)
+    TPI = [m1, m2]
+    ############
+    # SINGLE TAG, SINGLE PREFIX (STSPRE)
+    STSPRE1 = [m1, PREFIX[0]]
+    STSPRE2 = [m2, PREFIX[1]]
+    # SINGLE TAG, SINGLE SUFFIX (STSSUFF)
+    STSSUFF1 = [m1, SUFFIX[0]]
+    STSSUFF2 = [m2, SUFFIX[1]]
 
 def indicator(data, test):
     """
