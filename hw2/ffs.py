@@ -39,7 +39,7 @@ def sent_precheck(x):
     conjunctions = [None, 'after', 'although', 'and', 'as', 'because', 'before', 
                     'but', 'except', 'if', 'like', 'nor', 'now', 'once', 'or', 
                     'since', 'so', 'than', 'that', 'though', 'unless', 'until', 
-                    'when', 'where', 'whether', 'while']
+                    'when', 'where', 'whether', 'while','for']
     suffixes = [None,'able','ible','ial','al','ed','en','er','est','ful','ic','ing',
             'ation','ition','tion','ion','ity','ty','itive','ative','ive','less'
             ,'ly','ment','ness','ious','eous','ous','es']
