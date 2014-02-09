@@ -33,12 +33,18 @@ def sent_precheck(x):
     
     
     # First, define all word dictionaries.
+    interrogatives = ['which','what','when','who','where','why','whom','whose',
+                    'how','whether']
     conjunctions = [None, 'after', 'although', 'and', 'as', 'because', 'before', 
                     'but', 'except', 'if', 'like', 'nor', 'now', 'once', 'or', 
                     'since', 'so', 'than', 'that', 'though', 'unless', 'until', 
                     'when', 'where', 'whether', 'while']
-    suffixes = [None, 'ing', 'ly']
-    prefixes = [None, 'pre', 'post', 'de', 'inter', 'intra']
+    suffixes = [None,'able','ible','ial','al','ed','en','er','est','ful','ic','ing',
+            'ation','ition','tion','ion','ity','ty','itive','ative','ive','less'
+            ,'ly','ment','ness','ious','eous','ous','es']
+    prefixes = [None,'anti','de','dis','en','em','fore','intra','inter','in','im','il','ir',
+            'mid','mis','non','over','pre','re','semi','sub','super','trans'
+            ,'under','un','post']
     #store the size of these dictionaries for later book keeping
     x_info['num_conjunctions'] = length(conjunctions)
     x_info['num_suffixes'] = length(suffixes)
@@ -61,6 +67,14 @@ def sent_precheck(x):
     
     # now lowercase this shit
     x = [word.lower for word in x]
+    
+    #check for interrogative
+    if (x[1] in interrogatives):
+        interrogative_test = 1
+    else:
+        interrogative_test = 0
+    
+    x_info['begins_with_interrogative'] = interrogative_test
     
     for i,word in enumerate(x):
         # check conjunctions
