@@ -30,8 +30,7 @@ def sent_precheck(x):
     x_info = {}
     
     # Length of sentence.
-    x_info['length'] = length(x)
-    
+    x_info['length'] = len(x)
     
     # First, define all word dictionaries.
     interrogatives = ['which','what','when','who','where','why','whom','whose',
@@ -47,15 +46,15 @@ def sent_precheck(x):
             'mid','mis','non','over','pre','re','semi','sub','super','trans'
             ,'under','un','post']
     #store the size of these dictionaries for later book keeping
-    x_info['num_conjunctions'] = length(conjunctions)
-    x_info['num_suffixes'] = length(suffixes)
-    x_info['num_prefixes'] = length(prefixes)
+    x_info['num_conjunctions'] = len(conjunctions)
+    x_info['num_suffixes'] = len(suffixes)
+    x_info['num_prefixes'] = len(prefixes)
     
     #allocate arrays for word level checks
-    x_conjunctions = np.zeros(length(x))
-    x_suffixes = np.zeros(length(x))
-    x_prefixes = np.zeros(length(x))
-    x_capitals = np.zeros(length(x))
+    x_conjunctions = np.zeros(len(x))
+    x_suffixes = np.zeros(len(x))
+    x_prefixes = np.zeros(len(x))
+    x_capitals = np.zeros(len(x))
     
     # First check: capitalization.
     for i,word in enumerate(x):
@@ -87,7 +86,7 @@ def sent_precheck(x):
     
     #check prefixes
     for i,word in enumerate(x):
-        for j in range(1,length(prefixes)):
+        for j in range(1,len(prefixes)):
             if (word.startswith(prefixes[j])):
                 x_prefixes[i] = j
                 break
@@ -96,7 +95,7 @@ def sent_precheck(x):
     
     #check suffixes
     for i,word in enumerate(x):
-        for j in range(1,length(suffixes)):
+        for j in range(1,len(suffixes)):
             if (word.endswith(suffixes[j])):
                 x_suffixes[i] = j
                 break
