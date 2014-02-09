@@ -10,6 +10,7 @@ for computing forward/backward vectors, etc.
 """
 
 import numpy as np
+import itertools as it
 
 def sent_precheck(x):
     """
@@ -107,19 +108,37 @@ def metaff(m1, m2, x_info, i):
     Ns = x_info['Ns']  # number of suffixes
     Nc = x_info['Nc']  # number of conjunctions
     
-    trueFF = []  # container list for true FF meta-indices
+    CLASS_SIZES = [Np, Ns, Nc]
     
     ############
     # SINGLE TAG INDICATORS (STI)
-    STI1 = [m1]
-    STI2 = [m2]
-    
+    STI1 = m1
+    STI2 = m2
     ############
     # WORD-LEVEL DICTIONARY INDICATORS
-    PREFIX = x_info['pref_true']
-    SUFFIX = x_info['suff_true']
-    CONJUNCTION = x_info['conj_true']
-    CAPITALIZED = x_info['cap_true']
+    PREFIX = x_info['pref_true'][i-1:i+1]
+    SUFFIX = x_info['suff_true'][i-1:i+1]
+    CONJUNCTION = x_info['conj_true'][i-1:i+1]
+    CAPITALIZED = x_info['cap_true'][i-1:i+1]
+    ############
+    
+    # now start filling out whole list of nonzero feature functions
+    TAGS = [STI1, STI2]
+    ALLIND = [PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED]
+    ALLIND_flat = [item for sublist in ALLIND for item in sublist]
+    
+    trueFF = []
+    
+    # first do the single-word shit
+    # priors on tags
+    nstart = 0
+    trueFF = [m1, m2]
+    nstart = 2*M
+    
+    # now single tag single word indicators
+    for i,s in enumerate(CLASS_SIZES):
+        for 
+    
     
     ############################################################################
     # Now let's look at pairwise-indicators
@@ -133,6 +152,10 @@ def metaff(m1, m2, x_info, i):
     # SINGLE TAG, SINGLE SUFFIX (STSSUFF)
     STSSUFF1 = [m1, SUFFIX[0]]
     STSSUFF2 = [m2, SUFFIX[1]]
+    
+    
+    
+    
 
 def indicator(data, test):
     """
