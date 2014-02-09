@@ -67,7 +67,7 @@ def sent_precheck(x):
 
     
     # now lowercase this shit
-    x = [word.lower for word in x]
+    x = [word.lower() for word in x]
     
     #check for interrogative
     if (x[1] in interrogatives):
@@ -87,18 +87,18 @@ def sent_precheck(x):
     
     #check prefixes
     for i,word in enumerate(x):
-        for j in range(length(prefixes)):
-            if (word.startswith(prefixes[j+1])):
-                x_prefixes[i] = j+1
+        for j in range(1,length(prefixes)):
+            if (word.startswith(prefixes[j])):
+                x_prefixes[i] = j
                 break
     
     x_info['prefixes'] = x_prefixes
     
     #check suffixes
     for i,word in enumerate(x):
-        for j in range(length(suffixes)):
-            if (word.endswith(suffixes[j+1])):
-                x_suffixes[i] = j+1
+        for j in range(1,length(suffixes)):
+            if (word.endswith(suffixes[j])):
+                x_suffixes[i] = j
                 break
     
     x_info['suffixes'] = x_suffixes
@@ -118,11 +118,13 @@ def metaff(m1, m2, x_info, i):
     
     # define the size of some spaces
     M = 8  # number of possible tags
-    Np = x_info['Np']  # number of prefixes
-    Ns = x_info['Ns']  # number of suffixes
-    Nc = x_info['Nc']  # number of conjunctions
+    Np = x_info['num_prefixes']  # number of prefixes
+    Ns = x_info['num_suffixes']  # number of suffixes
+    Nc = x_info['num_conjunctions']  # number of conjunctions
+    Ncap = 2
+    Ninterr = 2
     
-    CLASS_SIZES = [Np, Ns, Nc]
+    CLASS_SIZES = [Np, Ns, Nc, Ncap, Ninterr]
     
     ############
     # SINGLE TAG INDICATORS (STI)
@@ -130,77 +132,46 @@ def metaff(m1, m2, x_info, i):
     STI2 = m2
     ############
     # WORD-LEVEL DICTIONARY INDICATORS
-    PREFIX = x_info['pref_true'][i-1:i+1]
-    SUFFIX = x_info['suff_true'][i-1:i+1]
-    CONJUNCTION = x_info['conj_true'][i-1:i+1]
-    CAPITALIZED = x_info['cap_true'][i-1:i+1]
+    PREFIX = x_info['prefixes'][i-1:i+1]
+    SUFFIX = x_info['suffixes'][i-1:i+1]
+    CONJUNCTION = x_info['conjunctions'][i-1:i+1]
+    CAPITALIZED = x_info['capitals'][i-1:i+1]
+    ############
+    # SENTENCE-LEVEL INDICATORS
+    INTERROGATIVE = x_info['begins_with_interrogative']
     ############
     
     # now start filling out whole list of nonzero feature functions
     TAGS = [STI1, STI2]
-    ALLIND = [PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED]
+    ALLIND = [PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED, [INTERROGATIVE]]
     ALLIND_flat = [item for sublist in ALLIND for item in sublist]
+    
+    N_wordlevel = 4  # number of word-level classes
     
     trueFF = []
     
     # first do the single-word shit
     # priors on tags
     nstart = 0
-    trueFF = [m1, m2]
-    nstart = 2*M
+    trueFF = [m1]
+    nstart += M
+    trueFF.append(m2)
+    nstart += M
     
     # now single tag single word indicators
-    for i,s in enumerate(CLASS_SIZES):
-        for 
+    # THIS IS WHERE SHIT GETS REAL
+    for j,(k,l) in it.product(TAGS,enumerate(ALLIND_flat)):
+        trueFF.append(int(nstart + j + l*M))
+        if k < N_wordlevel:
+            nstart += int(M * CLASS_SIZES[int(k/2)])
+        else:
+            nstart += int(M * CLASS_SIZES[int(N_wordlevel-1 + int(k/2)-N_wordlevel)])
     
-    
-    ############################################################################
-    # Now let's look at pairwise-indicators
-    ############
-    # TAG PAIR INDICATOR (TPI)
-    TPI = [m1, m2]
-    ############
-    # SINGLE TAG, SINGLE PREFIX (STSPRE)
-    STSPRE1 = [m1, PREFIX[0]]
-    STSPRE2 = [m2, PREFIX[1]]
-    # SINGLE TAG, SINGLE SUFFIX (STSSUFF)
-    STSSUFF1 = [m1, SUFFIX[0]]
-    STSSUFF2 = [m2, SUFFIX[1]]
-    
-    
-    
-    
+    J = nstart
+    return trueFF, J
 
-def indicator(data, test):
-    """
-    A simple Boolean indicator function on the two arguments, testing for 
-    equality.  The inputs can either be individual strings or tuples/lists 
-    of strings.
-    """
-    
-    return data == test
 
-def word_suffix(x, suffix):
-    """
-    A Boolean-valued function that returns whether or not the words in the 
-    input sequence "x" end in the input "suffix".
-    """
-    
-    return [word.endswith(suffix) for word in x]
 
-def word_prefix(x, prefix):
-    """
-    A Boolean-valued function that returns whether or not the words in the 
-    input sequence "x" begin with the input "prefix".
-    """
-    
-    return [word.startswith(prefix) for word in x]
 
-def length(x):
-    """
-    Computes and returns the length of a word or sentence.  If it's a word, 
-    just pass it bare to the function.  If a sentence, you should pass it 
-    already parsed into a list of words.
-    """
-    
-    return len(x)
+
+
