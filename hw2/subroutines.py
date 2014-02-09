@@ -6,34 +6,32 @@ Contains several routines
 
 import numpy as np
 import itertools as it
+import ffs
 
-def g(f, w, tags, x):
+def g(w, x):
     """
     Calculates g functions for each pair of tags y in a sentence x.
     
-    f - The "meta" feature function.
     w - List of weights associated with ffs.
-    tags - The set of possible tags.
     x - Sequence (sentence) over which to evaluate g.
     
     Returns: a (N-1) X M X M matrix where N is the length of the sentence, and 
     there are M possible tags for each word.
     """
     
-    M = len(tags)  # number of possible tags
+    M = 8  # number of possible tags
     N = len(x)  # length of sentence
     __g__ = np.zeros(shape=(N-1,M,M))
     
-    for i,(k1,tag1),(k2,tag2),(j,weight) in it.product(range(1,N),enumerate(tags),enumerate(tags),enumerate(w)):
-#        if i == 1:
-#            #__g__[i-1,k1,k2] += weight * f('START',tag2,x,i,j)
-#            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j) * (tag1=='START')
-#        elif i == (N-1):
-#            #__g__[i-1,k1,k2] += weight * f(tag1,'STOP',x,i,j)
-#            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j) * (tag2=='STOP')
-#        else:
-#            __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
-        __g__[i-1,k1,k2] += weight * f(tag1,tag2,x,i,j)
+    # preprocess the sentence
+    x_info = ffs.sent_precheck(x)
+    
+    for i,m1,m2 in it.product(range(1,N),range(0,M),range(0,M)):
+        # get the nonzero feature function indices for this tag pair
+        trueFF = ffs.metaff(m1,m2,x_info,i)[0]
+        # fill in the nonzero elements of g
+        for j in trueFF:
+            __g__[i-1,m1,m2] += w[j]
     
     return __g__
 
