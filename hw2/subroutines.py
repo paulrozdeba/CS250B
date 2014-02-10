@@ -28,7 +28,7 @@ def g(w, x):
     
     for i,m1,m2 in it.product(range(1,N),range(0,M),range(0,M)):
         # get the nonzero feature function indices for this tag pair
-        trueFF = ffs.metaff(m1,m2,x_info,i)[0]
+        trueFF = ffs.metaff(m1,m2,x_info,i)
         # fill in the nonzero elements of g
         for j in trueFF:
             __g__[i-1,m1,m2] += w[j]
@@ -122,7 +122,28 @@ def Z(g):
     for k in range(alpha_matrix.shape[0]):
         Z[k] = np.dot(alpha_matrix[k,:],beta_matrix[k,:])
     return np.mean(Z)
+
+def bestlabel(U, g):
+    """
+    Predicts the best label for an example, based on U and g matrices.
+    """
     
+    N = U.shape[0]  # length of sentence
+    y = []  # to store the label
+    
+    # first find the best tag at position n
+    y_N = np.argmax(U[-1])
+    y.append(y_N)
+    ykbest = y_N
+    
+    # now get the rest of the label
+    for i,(U_km1,g_k) in enumerate(zip(U[::-1],g[::-1])):
+        y_km1_best = np.argmax(U_km1 + g_k[:,ykbest])
+        y.append(y_km1_best)
+        ykbest = y_km1_best
+    
+    return y[::-1]
+        
 
 
 

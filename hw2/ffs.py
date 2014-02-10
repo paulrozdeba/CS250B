@@ -104,13 +104,15 @@ def sent_precheck(x):
     
     return x_info
 
-def metaff(m1, m2, x_info, i):
+def metaff(m1, m2, x_info, i, Jout=False):
     """
     This is the feature function you interact with.
     
     m1, m2 - The indices of the tag pair over which to evaluate the ff's.
     x_info - Information about the sentence.
     i - Position in sentence.
+    Jout - flag for outputting J, False by default.  It's there so calcJ can 
+           use this function with dummy data to get J.
     
     Returns a list of indices of the TRUE feature functions.
     """
@@ -167,7 +169,30 @@ def metaff(m1, m2, x_info, i):
             nstart += int(M * CLASS_SIZES[int(N_wordlevel-1 + int(k/2)-N_wordlevel)])
     
     J = nstart
-    return trueFF, J
+    
+    if Jout == False:
+        return trueFF
+    else:
+        return trueFF, J
+
+def calcJ():
+    """
+    Calculates the total number of feature functions.  Takes no input, but 
+    calls metaff with some dummy data.
+    """
+    
+    # gathering dummy parameters to pass to metaff
+    m1 = 0
+    m2 = 0
+    i = 1
+    
+    sentence = ['FIRSTWORD','LASTWORD']
+    x_info = sent_precheck(sentence)
+    
+    # call metaff to get J
+    J = metaff(m1, m2, x_info, i, Jout=True)[1]
+    
+    return J
 
 
 
