@@ -115,9 +115,7 @@ def __U_singlek__(g, k):
     else:
         return np.amax(__U_singlek__(g,k-1) + g[k], axis=0)
 
-def Z(g):
-    alpha_matrix = alpha_mat(g)
-    beta_matrix = beta_mat(g)
+def Z(alpha_matrix,beta_matrix):
     Z = np.zeros(alpha_matrix.shape[0])
     for k in range(alpha_matrix.shape[0]):
         Z[k] = np.dot(alpha_matrix[k,:],beta_matrix[k,:])
