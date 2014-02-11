@@ -158,9 +158,9 @@ def score(weights,validate_labels,validate_sentences):
         num_error = 0
         y = validate_labels[i]
         x = validate_sentences[i]
-        g = g(weights,x)
-        U = U(g)
-        y_predict = bestlabel(U,g)
+        g_self = g(weights,x)
+        U_self = U(g_self)
+        y_predict = bestlabel(U_self,g_self)
         for j in range(len(y)):
             if(y[j] != y_predict[j]):
                 num_error += 1.0

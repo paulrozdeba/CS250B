@@ -39,7 +39,7 @@ def main():
     """
     
     # now run it
-    w = collins_epoch(train_labels[:1000], train_sentences[:1000], np.zeros(J))
+    w = collins_epoch(train_labels, train_sentences, np.zeros(J))
     print w[-1]
     
     # make a prediction on a dummy sentence
@@ -47,6 +47,9 @@ def main():
     g_dummy = sr.g(w[-1],dummy)
     U_dummy = sr.U(g_dummy)
     y_best = sr.bestlabel(U_dummy,g_dummy)
+    
+    # calculate score of prediction
+    print sr.score(w[-1], [[0,2,2,2,tag_dict['QUESTION_MARK'],1]], [dummy])
     
     print y_best
     
@@ -67,6 +70,10 @@ def collins_epoch(train_labels, train_sentences, w0):
     J = len(w0)  # number of parameters, equal to number of feature functions
     w = np.zeros(shape=(Ntrain+1,J))  # to store the parameter trajectory
     w[0] = w0
+    
+    # pick out a random subset of training examples
+    sentences_self = train_sentences[:50000]
+    labels_self = train_labels[:50000]
     
     # track average number of true feature functions
     av_true = 0
