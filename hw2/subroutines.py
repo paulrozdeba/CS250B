@@ -21,6 +21,7 @@ def g(w, x):
     
     M = 8  # number of possible tags
     N = len(x)  # length of sentence
+    
     __g__ = np.zeros(shape=(N-1,M,M))
     
     # preprocess the sentence
@@ -95,8 +96,9 @@ def U(g):
     g - The matrix elements of g for the entire sequence x.
     """
     
-    N = g.shape[0]  # length of sentence x
+    N = g.shape[0]  # number of pairs in sentence
     M = g.shape[1]  # number of possible tags
+    assert(M == g.shape[2])  # just a consistency check on the shape
     __U__ = np.zeros(shape=(N,M))
     
     for i in range(N):
@@ -111,7 +113,8 @@ def __U_singlek__(g, k):
     
     # implement recursion here
     if k == 0:
-        return np.amax(g[0], axis=0)
+        #return np.amax(g[0], axis=0)
+        return g[0,0]
     else:
         return np.amax(__U_singlek__(g,k-1) + g[k], axis=0)
 
@@ -127,6 +130,7 @@ def bestlabel(U, g):
     """
     
     N = U.shape[0]  # length of sentence
+    assert(g.shape[0] == N)
     y = []  # to store the label
     
     # first find the best tag at position n
@@ -135,10 +139,11 @@ def bestlabel(U, g):
     ykbest = y_N
     
     # now get the rest of the label
-    for i,(U_km1,g_k) in enumerate(zip(U[::-1],g[::-1])):
+    for U_km1,g_k in zip(U[::-1][1:],g[::-1][:-1]):
         y_km1_best = np.argmax(U_km1 + g_k[:,ykbest])
         y.append(y_km1_best)
         ykbest = y_km1_best
+    y.append(0)
     
     return y[::-1]
         

@@ -17,16 +17,30 @@ def main():
     
     # get J, the total number of feature functions
     J = ffs.calcJ()
+    print 'J = ',J
+    #J = 2832
+    
+    """
+    # test for last tag indicator
+    testsent = ['FIRSTWORD','Boom','LASTWORD']
+    testlab = [0, 2, 1]
+    x_info = ffs.sent_precheck(testsent)
+    ffs.metaff(testlab[-2],testlab[-1],x_info,2)
+    for i,(m1,m2) in enumerate(zip(testlab[0:-2],testlab[1:])):
+        trueFF = ffs.metaff(m1,m2,x_info,i+1)
+    """
     
     # now run it
-    w = collins_epoch(train_labels[:100], train_sentences[:100], np.zeros(J))
+    w = collins_epoch(train_labels[:10000], train_sentences[:10000], np.zeros(J))
+    print w[-1]
     
     # make a prediction on a dummy sentence
-    dummy = ['FIRSTWORD','Hello','James','LASTWORD']
+    dummy = ['FIRSTWORD','How','are','you','LASTWORD']
     g_dummy = sr.g(w[-1],dummy)
     U_dummy = sr.U(g_dummy)
     y_best = sr.bestlabel(U_dummy,g_dummy)
-    print dummy, y_best
+    
+    print y_best
     
     exit(0)
 
@@ -47,7 +61,9 @@ def collins_epoch(train_labels, train_sentences, w0):
     w[0] = w0
     
     for nex,(sentence,label) in enumerate(zip(train_sentences,train_labels)):
-        print nex
+        if (nex+1)%100 == 0:
+            print nex + 1
+        
         # first, calculate g
         g_ex = sr.g(w0,sentence)
         
@@ -58,16 +74,17 @@ def collins_epoch(train_labels, train_sentences, w0):
         y_best = sr.bestlabel(U_ex,g_ex)
         
         # update the weight
-        x_info = ffs.sent_precheck(sentence)
         w[nex+1] = w[nex]
+        x_info = ffs.sent_precheck(sentence)
         
-        for i,(m1,m2,b1,b2) in enumerate(zip(label[0:-2],label[1:],y_best[0:-2],y_best[1:])):
+        for i,(m1,m2,b1,b2) in enumerate(zip(label[:-1],label[1:],y_best[:-1],y_best[1:])):
             trueFF = ffs.metaff(m1,m2,x_info,i+1)
             bestFF = ffs.metaff(b1,b2,x_info,i+1)
             for j in trueFF:
                 w[nex+1,j] += 1
             for j in bestFF:
                 w[nex+1,j] -= 1
+                #continue
     
     return w
         
