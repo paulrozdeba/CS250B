@@ -33,9 +33,9 @@ def sent_precheck(x):
     x_info['length'] = len(x)
     
     # First, define all word dictionaries.
-    interrogatives = [None,'which','what','when','who','where','why','whom','whose',
+    interrogatives = ['which','what','when','who','where','why','whom','whose',
                     'how','whether']
-    conjunctions = [None,'after', 'although', 'and', 'as', 'because', 'before', 
+    conjunctions = [None, 'after', 'although', 'and', 'as', 'because', 'before', 
                     'but', 'except', 'if', 'like', 'nor', 'now', 'once', 'or', 
                     'since', 'so', 'than', 'that', 'though', 'unless', 'until', 
                     'when', 'where', 'whether', 'while','for']
@@ -87,7 +87,9 @@ def sent_precheck(x):
     for i,word in enumerate(x):
         # check conjunctions
         if word in conjunctions:
-            x_conjunctions[i] = conjunctions.index(word)
+            x_conjunctions[i] = x.index(word)
+        else:
+            x_conjunctions[i] = 0
     x_info['conjunctions'] = x_conjunctions
     
     #check prefixes
@@ -123,16 +125,16 @@ def metaff(m1, m2, x_info, i, Jout=False):
     Returns a list of indices of the TRUE feature functions.
     """
     
-    L = x_info['length']
-    
     # define the size of some spaces
     M = 8  # number of possible tags
     Np = x_info['num_prefixes']  # number of prefixes
     Ns = x_info['num_suffixes']  # number of suffixes
     Nc = x_info['num_conjunctions']  # number of conjunctions
-    Ncap = 1
-    Ninterr = 1
-    Nfl = 2  # FIRSTWORD or LASTWORD class, can be either or none
+    Ncap = 2
+    Ninterr = 2
+    Nfl = 3  # FIRSTWORD or LASTWORD class, can be either or none
+    
+    CLASS_SIZES = [Np, Ns, Nc, Ncap, Nfl, Ninterr]
     
     ############
     # SINGLE TAG INDICATORS (STI)
@@ -152,54 +154,32 @@ def metaff(m1, m2, x_info, i, Jout=False):
     
     # now start filling out whole list of nonzero feature functions
     TAGS = [STI1, STI2]
-    if i == (L-1):
-        CLASS_SIZES = [Nfl, Ninterr, Np, Ns, Nc, Ncap]
-        ALLIND = [FIRSTLAST, [INTERROGATIVE,INTERROGATIVE], PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED]
-    else:
-        ALLIND = [FIRSTLAST, PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED]
-        CLASS_SIZES = [Nfl, Np, Ns, Nc, Ncap]
-    
-    #ALLIND = [FIRSTLAST]
+    ALLIND = [PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED, FIRSTLAST, [INTERROGATIVE]]
     ALLIND_flat = [item for sublist in ALLIND for item in sublist]
+    
+    N_wordlevel = 5  # number of word-level classes
     
     trueFF = []
     
     # first do the single-word shit
     # priors on tags
     nstart = 0
-    #trueFF.append(nstart + m1)
-    #nstart += M
-    #trueFF.append(nstart + m2)
-    #nstart += M
+    trueFF.append(nstart + m1)
+    nstart += M
+    trueFF.append(nstart + m2)
+    nstart += M
     
     # now single tag single word indicators
     # THIS IS WHERE SHIT GETS REAL
-    """
     for j,(k,l) in it.product(TAGS,enumerate(ALLIND_flat)):
-        if l != 0:
-            trueFF.append(int(nstart + j + (l-1)*M))  # only count true instances
-        nstart += int(M * CLASS_SIZES[int(k/2)])
+        trueFF.append(int(nstart + j + l*M))
         if k < N_wordlevel*2:
             nstart += int(M * CLASS_SIZES[int(k/2)])
         else:
             nstart += int(M * CLASS_SIZES[int(N_wordlevel + int(k/2)-N_wordlevel)])
-    """
-    
-    for j,(k,l) in it.product([TAGS[0]],enumerate(ALLIND_flat[::2])):
-        if l != 0:
-            trueFF.append(int(nstart + j + (l-1)*M))  # only count true instances
-        nstart += int(M * CLASS_SIZES[int(k)])
-    
-    for j,(k,l) in it.product([TAGS[1]],enumerate(ALLIND_flat[1::2])):
-        if l != 0:
-            trueFF.append(int(nstart + j + (l-1)*M))  # only count true instances
-        nstart += int(M * CLASS_SIZES[int(k)])
     
     # now pairwise interactions
-    #for (m1,m2),(k,(d1,d2)) in it.product([TAGS],enumerate(ALLIND)):
-    #    if d1!=0 or d2!=0:
-    #        trueFF.append(int(nstart + m1 + m2*M + (d1)*M*M + (d2)*M*M*CLASS_SIZES[k]))
-    #    nstart += int(M * M * CLASS_SIZES[k] * CLASS_SIZES[k])
+    
     
     J = nstart
     
