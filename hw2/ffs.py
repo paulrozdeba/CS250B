@@ -130,9 +130,9 @@ def metaff(m1, m2, x_info, i, Jout=False):
     Np = x_info['num_prefixes']  # number of prefixes
     Ns = x_info['num_suffixes']  # number of suffixes
     Nc = x_info['num_conjunctions']  # number of conjunctions
-    Ncap = 1
-    Ninterr = 1
-    Nfl = 2  # FIRSTWORD or LASTWORD class, can be either or none
+    Ncap = 2
+    Ninterr = 2
+    Nfl = 3  # FIRSTWORD or LASTWORD class, can be either or none
     
     ############
     # SINGLE TAG INDICATORS (STI)
@@ -154,7 +154,11 @@ def metaff(m1, m2, x_info, i, Jout=False):
     TAGS = [STI1, STI2]
     if i == (L-1):
         CLASS_SIZES = [Nfl, Ninterr, Np, Ns, Nc, Ncap]
-        ALLIND = [FIRSTLAST, [INTERROGATIVE,INTERROGATIVE], PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED]
+        ALLIND = [FIRSTLAST, [INTERROGATIVE,INTERROGATIVE], PREFIX, SUFFIX, 
+                  CONJUNCTION, CAPITALIZED]
+    #elif i == 1:
+    #    ALLIND = [FIRSTLAST, PREFIX, SUFFIX, CONJUNCTION, [0,CAPITALIZED[1]]]
+    #    CLASS_SIZES = [Nfl, Np, Ns, Nc, Ncap]
     else:
         ALLIND = [FIRSTLAST, PREFIX, SUFFIX, CONJUNCTION, CAPITALIZED]
         CLASS_SIZES = [Nfl, Np, Ns, Nc, Ncap]
@@ -174,17 +178,6 @@ def metaff(m1, m2, x_info, i, Jout=False):
     
     # now single tag single word indicators
     # THIS IS WHERE SHIT GETS REAL
-    """
-    for j,(k,l) in it.product(TAGS,enumerate(ALLIND_flat)):
-        if l != 0:
-            trueFF.append(int(nstart + j + (l-1)*M))  # only count true instances
-        nstart += int(M * CLASS_SIZES[int(k/2)])
-        if k < N_wordlevel*2:
-            nstart += int(M * CLASS_SIZES[int(k/2)])
-        else:
-            nstart += int(M * CLASS_SIZES[int(N_wordlevel + int(k/2)-N_wordlevel)])
-    """
-    
     for j,(k,l) in it.product([TAGS[0]],enumerate(ALLIND_flat[::2])):
         if l != 0:
             trueFF.append(int(nstart + j + (l-1)*M))  # only count true instances
@@ -197,9 +190,9 @@ def metaff(m1, m2, x_info, i, Jout=False):
     
     # now pairwise interactions
     #for (m1,m2),(k,(d1,d2)) in it.product([TAGS],enumerate(ALLIND)):
-    #    if d1!=0 or d2!=0:
+    #    if d1!=0 and d2!=0:
     #        trueFF.append(int(nstart + m1 + m2*M + (d1)*M*M + (d2)*M*M*CLASS_SIZES[k]))
-    #    nstart += int(M * M * CLASS_SIZES[k] * CLASS_SIZES[k])
+    #    nstart += int(M + M*M + M*M*CLASS_SIZES[k] + M*M*CLASS_SIZES[k]*CLASS_SIZES[k])
     
     J = nstart
     
