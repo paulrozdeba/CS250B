@@ -15,6 +15,14 @@ def main():
     train_labels = dp.labels_as_ints('dataset/trainingLabels.txt')
     train_sentences = dp.import_sentences('dataset/trainingSentences.txt')
     
+    # load dictionary of tags <--> ints
+    tag_dict = dp.export_dict()
+    tag_dict['START'] = 0
+    tag_dict['STOP'] = 1
+    tag_dict_inverse = dp.export_dict_inverse()
+    tag_dict_inverse[0] = 'START'
+    tag_dict_inverse[1] = 'STOP'
+    
     # get J, the total number of feature functions
     J = ffs.calcJ()
     print 'J = ',J
@@ -31,11 +39,11 @@ def main():
     """
     
     # now run it
-    w = collins_epoch(train_labels[:10000], train_sentences[:10000], np.zeros(J))
+    w = collins_epoch(train_labels[:1000], train_sentences[:1000], np.zeros(J))
     print w[-1]
     
     # make a prediction on a dummy sentence
-    dummy = ['FIRSTWORD','How','are','you','LASTWORD']
+    dummy = ['FIRSTWORD','How','are','you','doing','LASTWORD']
     g_dummy = sr.g(w[-1],dummy)
     U_dummy = sr.U(g_dummy)
     y_best = sr.bestlabel(U_dummy,g_dummy)
@@ -60,6 +68,10 @@ def collins_epoch(train_labels, train_sentences, w0):
     w = np.zeros(shape=(Ntrain+1,J))  # to store the parameter trajectory
     w[0] = w0
     
+    # track average number of true feature functions
+    av_true = 0
+    nevals = 0
+    
     for nex,(sentence,label) in enumerate(zip(train_sentences,train_labels)):
         if (nex+1)%100 == 0:
             print nex + 1
@@ -80,11 +92,17 @@ def collins_epoch(train_labels, train_sentences, w0):
         for i,(m1,m2,b1,b2) in enumerate(zip(label[:-1],label[1:],y_best[:-1],y_best[1:])):
             trueFF = ffs.metaff(m1,m2,x_info,i+1)
             bestFF = ffs.metaff(b1,b2,x_info,i+1)
+            
+            av_true += len(trueFF)
+            nevals += 1
+            
             for j in trueFF:
                 w[nex+1,j] += 1
             for j in bestFF:
                 w[nex+1,j] -= 1
                 #continue
+    
+    print 'Average number of true FF\'s: ',(av_true/nevals)
     
     return w
         

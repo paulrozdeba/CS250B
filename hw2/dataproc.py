@@ -42,7 +42,7 @@ def labels_as_ints(path_to_file):
     path_to_file should be the path and filename of the labels data.  Returns
     a list of lists with corresponding tags as integer equivalents.
     """
-    key_dict = dict([('SPACE',2),('COMMA',3),('PERIOD',4),('COLON',5),('EXCLAMATION_POINT',6),('QUESTION_MARK',7)])
+    key_dict = export_dict()
     labels = []
     f = open(path_to_file,'r')
     for line in f:
@@ -54,3 +54,15 @@ def labels_as_ints(path_to_file):
         labels.append(c)
     f.close()
     return labels
+
+def export_dict():
+    key_dict = {'SPACE':2, 'COMMA':3, 'PERIOD':4, 'COLON':5, 
+                'EXCLAMATION_POINT':6, 'QUESTION_MARK':7}
+    return key_dict
+
+def export_dict_inverse():
+    tag_dict = export_dict()
+    tag_dict_inverse = {}
+    for key,item in tag_dict.iteritems():
+        tag_dict_inverse[item] = key
+    return tag_dict_inverse
