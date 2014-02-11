@@ -79,9 +79,7 @@ def sent_precheck(x):
     for i,word in enumerate(x):
         # check conjunctions
         if word in conjunctions:
-            x_conjunctions[i] = x.index(word)
-        else:
-            x_conjunctions[i] = 0
+            x_conjunctions[i] = conjunctions.index(word)
     x_info['conjunctions'] = x_conjunctions
     
     #check prefixes

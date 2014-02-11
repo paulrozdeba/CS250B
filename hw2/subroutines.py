@@ -141,8 +141,25 @@ def bestlabel(U, g):
         ykbest = y_km1_best
     
     return y[::-1]
-        
 
 
-
-
+def score(weights,validate_labels,validate_sentences):
+    """
+    Calculates the average word level accuracy percentage
+    """
+    N_validate = len(validate_labels)
+    average_error = 0.0
+    for i in range(N_validate):
+        num_error = 0
+        y = validate_labels[i]
+        x = validate_sentences[i]
+        g = g(weights,x)
+        U = U(g)
+        y_predict = bestlabel(U,g)
+        for j in range(len(y)):
+            if(y[j] != y_predict[j]):
+                num_error += 1.0
+        num_error *= 1.0/float(len(y))
+        average_error += num_error
+    average_error *= 1.0/float(N_validate)
+    return average_error
