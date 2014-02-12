@@ -147,24 +147,90 @@ def bestlabel(U, g):
     
     return y[::-1]
 
+def dummy_predict(x):
+    y=[]
+    for i in range(len(x)):
+        if(i==0):
+            y.append(0)
+        elif(i==(len(x)-2)):
+            y.append(4)
+        elif(i==(len(x)-1)):
+            y.append(1)
+        else:
+            y.append(2)
+    return y_dummy
 
-def score(weights,validate_labels,validate_sentences):
+def score_by_word(weights,score_labels,score_sentences,dummy=0):
     """
-    Calculates the average word level accuracy percentage
+    Calculates the percentage of words properly punctuated
     """
-    N_validate = len(validate_labels)
-    average_error = 0.0
+    N_validate = len(score_labels)
+    N_words = 0.0
+    Num_correct = 0.0
     for i in range(N_validate):
-        num_error = 0
-        y = validate_labels[i]
-        x = validate_sentences[i]
-        g_self = g(weights,x)
-        U_self = U(g_self)
-        y_predict = bestlabel(U_self,g_self)
+        y = score_labels[i]
+        x = score_sentences[i]
+        N_words += len(x)
+        g_test = g(weights,x)
+        U_test = U(g)
+        if(dummy==0):
+            y_predict = bestlabel(U_test,g_test)
+        else:
+            y_predict = dummy_predict(x)
         for j in range(len(y)):
-            if(y[j] != y_predict[j]):
-                num_error += 1.0
-        num_error *= 1.0/float(len(y))
-        average_error += num_error
-    average_error *= 1.0/float(N_validate)
-    return average_error
+            if(y[j] == y_predict[j]):
+                Num_correct += 1.0
+    return Num_correct/Num_words
+
+def score_by_sentence(weights,score_labels,score_sentences,dummy):
+    """
+    Returns the percentage of sentences that are completely accurately predicted
+    """
+    N_validate = len(score_labels)
+    num_correct = 0.0
+    for i in range(N_validate):
+        y = score_labels[i]
+        x = score_sentences[i]
+        g_test = g(weights,x)
+        U_test = U(g)
+        if(dummy==0):
+            y_predict = bestlabel(U_test,g_test)
+        else:
+            y_predict = dummy_predict(x)
+        if(y==y_predict):
+            num_correct += 1.0
+    return num_correct / float(N_validate)
+
+def score_by_mark(weights,score_labels,score_sentences,dummy):
+    """
+    Returns several things
+    """
+    N_validate = len(score_labels)
+    score_mat = np.zeros((8,8))
+    predict_totals = np.zeros(8)
+    true_totals = np.zeros(8)
+    percentage_mat = np.zeros(8)
+    accuracy_vec = np.zeros(8)
+    for i in range(N_validate):
+        y = score_labels[i]
+        x = score_sentences[i]
+        g_test = g(weights,x)
+        U_test = U(g)
+        if(dummy==0):
+            y_predict = bestlabel(U_test,g_test)
+        else:
+            y_predict = dummy_predict(x)
+        for i in range(len(y)):
+            score_mat[y[i],y_predict[i]] += 1.0
+    predict_totals = np.sum(score_mat,axis=0)
+    true_totals = np.sum(score_mat,axis=1)
+    for i in range(8):
+        percentage_mat[i,:] = score_mat / true_totals[i]
+        accuracy_vec[i] = percentage_mat[i,i]
+    return percentage_mat,accuracy_vec
+
+def general_score(weights,score_labels,score_sentences,method,dummy):
+    if (method=='word'):
+        return score_by_word(weights,score_labels,score_sentences,dummy)
+    elif (method=='sentence'):
+        return score_by_sentence(weights,score_labels,score_sentences,dummy)
