@@ -18,8 +18,9 @@ def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_se
     """
     #max_epoch = 5
     converged = 0
-    lr = 1.0
-    
+    lr = 0.1
+    avg_time_per_epoch = 0.0
+    score_list = []
     num_training = len(train_sentences)
     order = np.arange(0, num_training, dtype='int') # ordering of training ex's
     
@@ -33,8 +34,10 @@ def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_se
     old_weights = np.zeros(J)
     dw = np.zeros(J)
     score = 0.0
+    score_list.append(score)
     
     for epoch in range(max_epoch):
+        time1 = time.time()
         #print "epoch number {}".format(epoch)
         i = 0
         #put something in here about learning rate?
@@ -47,21 +50,25 @@ def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_se
             dw = compute_gradient(x,y,weights,dw)
             weights += lr*dw 
             i += 1
+        time2 = time1 - time.time()
+        avg_time_per_epoch += time2
         #convergence test, remove this commentary when we have a score function
         #in collins module
         new_score = sr.general_score(weights,validate_labels,validate_sentences,method,0)
+        score_list.append(new_score)
         if (new_score > score):
             #the validation score has increased
             score = new_score
         else:
-            #validation error has increased, early stopping dictates we stop
+            #validation score has decreased, early stopping dictates we stop
             #training and use the old weights
             converged = 1
             weights = np.copy(old_weights)
             break
     
+    avg_time_per_epoch /= float(epoch)
     #score = 0.0
-    return weights,score,epoch
+    return weights,score_list,epoch,avg_time_per_epoch
 
 def compute_gradient(x,y,w,dw):
     """
