@@ -172,7 +172,8 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
         x = score_sentences[i]
         N_words += len(x)
         g_test = g(weights,x)
-        U_test = U(g)
+        #print g_test
+        U_test = U(g_test)
         if(dummy==0):
             y_predict = bestlabel(U_test,g_test)
         else:
@@ -180,7 +181,7 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
         for j in range(len(y)):
             if(y[j] == y_predict[j]):
                 Num_correct += 1.0
-    return Num_correct/Num_words
+    return Num_correct/N_words
 
 def score_by_sentence(weights,score_labels,score_sentences,dummy):
     """
@@ -192,7 +193,7 @@ def score_by_sentence(weights,score_labels,score_sentences,dummy):
         y = score_labels[i]
         x = score_sentences[i]
         g_test = g(weights,x)
-        U_test = U(g)
+        U_test = U(g_test)
         if(dummy==0):
             y_predict = bestlabel(U_test,g_test)
         else:
@@ -215,7 +216,7 @@ def score_by_mark(weights,score_labels,score_sentences,dummy):
         y = score_labels[i]
         x = score_sentences[i]
         g_test = g(weights,x)
-        U_test = U(g)
+        U_test = U(g_test)
         if(dummy==0):
             y_predict = bestlabel(U_test,g_test)
         else:

@@ -7,6 +7,7 @@ import ffs as ff
 import numpy as np
 import dataproc as dp
 import collins as collins
+import time
 
 def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_sentences,method):
     """
@@ -34,13 +35,13 @@ def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_se
     score = 0.0
     
     for epoch in range(max_epoch):
-        print "epoch number {}".format(epoch)
+        #print "epoch number {}".format(epoch)
         i = 0
         #put something in here about learning rate?
         np.random.shuffle(order)  # randomly shuffle test data
         old_weights = np.copy(weights)
         for ind_ex in order:
-            print "Now processing sample {} of {}".format(i,num_training)
+            #print "Now processing sample {} of {}".format(i,num_training)
             x = train_sentences[ind_ex]
             y = train_labels[ind_ex]
             dw = compute_gradient(x,y,weights,dw)
@@ -59,7 +60,7 @@ def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_se
             weights = np.copy(old_weights)
             break
     
-    score = 0.0
+    #score = 0.0
     return weights,score,epoch
 
 def compute_gradient(x,y,w,dw):
@@ -86,7 +87,8 @@ def compute_gradient(x,y,w,dw):
             for m2 in range(8):
                 factor = alpha[i,m1]*beta[i+1,m2]*e_g[i,m1,m2]/z
                 #get list of non-zero (and thus =1) f_j for (i,m1,m2)
-                trueFF = ff.metaff(m1,m2,x_info,i)
+                #print m1,m2,x_info,i
+                trueFF = ff.metaff(m1,m2,x_info,i+1)
                 #add the weighting factor to them
                 for j in trueFF:
                     dw[j] -= factor
