@@ -180,10 +180,11 @@ def metaff(m1, m2, x_info, i, Jout=False):
     """
     
     # pairwise interactions
-    for (m1,m2),(k,(d1,d2)) in it.product([TAGS],enumerate(ALLIND)):
+    #for (m1,m2),(k,(d1,d2)) in it.product([TAGS],enumerate(ALLIND)):
+    for (m1,(k1,d1)),(m2,(k2,d2)) in zip(it.product([TAGS[0]],enumerate(ALLIND_flat[::2])),it.product([TAGS[1]],enumerate(ALLIND_flat[1::2]))):
         if d1!=0 or d2!=0:
-            trueFF.append(int(nstart + m1 + m2*M + (d1)*M*M + (d2)*M*M*CLASS_SIZES[k]))
-        nstart += int(M + M*M + M*M*CLASS_SIZES[k] + M*M*CLASS_SIZES[k]*CLASS_SIZES[k])
+            trueFF.append(int(nstart + m1 + m2*M + (d1)*M*M + (d2)*M*M*CLASS_SIZES[k2]))
+        nstart += int(M + M*M + M*M*CLASS_SIZES[k1] + M*M*CLASS_SIZES[k1]*CLASS_SIZES[k2])
     
     J = nstart  # the total number of feature functions
     
