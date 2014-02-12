@@ -203,13 +203,14 @@ def score_by_sentence(weights,score_labels,score_sentences,dummy=0):
 
 def score_by_mark(weights,score_labels,score_sentences,dummy=0):
     """
-    Returns an array which contains the percentage each mark was correctly
-    predicted
+    Returns several things
     """
     N_validate = len(score_labels)
     score_mat = np.zeros((8,8))
     predict_totals = np.zeros(8)
     true_totals = np.zeros(8)
+    percentage_mat = np.zeros(8)
+    accuracy_vec = np.zeros(8)
     for i in range(N_validate):
         y = score_labels[i]
         x = score_sentences[i]
@@ -221,6 +222,15 @@ def score_by_mark(weights,score_labels,score_sentences,dummy=0):
             y_predict = dummy_predict(x)
         for i in range(len(y)):
             score_mat[y[i],y_predict[i]] += 1.0
+    predict_totals = np.sum(score_mat,axis=0)
+    true_totals = np.sum(score_mat,axis=1)
     for i in range(8):
-        
-    return score_mat
+        percentage_mat[i,:] = score_mat / true_totals[i]
+        accuracy_vec[i] = percentage_mat[i,i]
+    return percentage_mat,accuracy_vec
+
+def general_score(weights,score_labels,score_sentences,dummy=0,method):
+    if (method=='word'):
+        return score_by_word(weights,score_labels,score_sentences,dummy)
+    elif (method=='sentence'):
+        return score_by_sentence(weights,score_labels,score_sentences,dummy)
