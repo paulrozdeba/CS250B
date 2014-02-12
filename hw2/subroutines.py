@@ -182,7 +182,7 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
                 Num_correct += 1.0
     return Num_correct/Num_words
 
-def score_by_sentence(weights,score_labels,score_sentences,dummy=0):
+def score_by_sentence(weights,score_labels,score_sentences,dummy):
     """
     Returns the percentage of sentences that are completely accurately predicted
     """
@@ -201,7 +201,7 @@ def score_by_sentence(weights,score_labels,score_sentences,dummy=0):
             num_correct += 1.0
     return num_correct / float(N_validate)
 
-def score_by_mark(weights,score_labels,score_sentences,dummy=0):
+def score_by_mark(weights,score_labels,score_sentences,dummy):
     """
     Returns several things
     """
@@ -229,7 +229,7 @@ def score_by_mark(weights,score_labels,score_sentences,dummy=0):
         accuracy_vec[i] = percentage_mat[i,i]
     return percentage_mat,accuracy_vec
 
-def general_score(weights,score_labels,score_sentences,dummy=0,method):
+def general_score(weights,score_labels,score_sentences,method,dummy):
     if (method=='word'):
         return score_by_word(weights,score_labels,score_sentences,dummy)
     elif (method=='sentence'):
