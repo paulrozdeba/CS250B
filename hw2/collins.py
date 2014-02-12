@@ -10,38 +10,19 @@ import dataproc as dp
 import ffs
 import time
 
-def collins(train_labels, train_sentences, test_labels, test_sentences, 
-            pct_train=None):
+def collins(train_labels_f, train_sentences_f, test_labels_f, test_sentences_f, 
+            pct_train=0.5, Nex=None):
     """
     Runs the Collins perceptron training on the input training data.
-
+    
     labels - Path to the file containing the training labels.
     sentences - Path to the file containing training sentences.
     pct_train - Percentage of examples from data set to use as training data.
              The rest are used as validation data.
     """
     
-    # first import the training data
-    train_labels_ordered = dp.labels_as_ints(train_labels)
-    train_sentences_ordered = dp.import_sentences(train_sentences)
-    Nex = len(train_labels)
-    Ntrain = int(pct_train*Nex + 1)
-    
-    # split into training and validation sets
-    train_labels = []
-    train_sentences = []
-    validation_labels = []
-    validation_sentences = []
-    examples = np.random.shuffle(np.arange(0,Nex,dtype='int'))
-    train_examples = examples[:Ntrain]
-    validation_examples = examples[Ntrain:]
-    
-    for tex in train_examples:
-        train_labels.append(train_labels_ordered[tex])
-        train_sentences.append(train_sentences_ordered[tex])
-    for vec in validation_examples:
-        validation_labels.append(train_labels_ordered[vex])
-        validation_sentences.append(train_sentences_ordered[vex])
+    # load shuffled data sets
+    train_labels, train_sentences, validation_labels, validation_sentences = sr.shuffle_examples(train_labels_f, train_sentences_f, pct_train)
     
     # load dictionary of tags <--> ints
     tag_dict = dp.export_dict()
