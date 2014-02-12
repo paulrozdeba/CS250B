@@ -10,28 +10,42 @@ import dataproc as dp
 import ffs
 import time
 
-def collins(train_labels_f, train_sentences_f, test_labels_f, test_sentences_f, 
-            pct_train=0.5, Nex=None):
+def collins(train_labels, train_sentences, validation_labels, 
+            validation_sentences, pct_train=0.5, Nex=None):
     """
     Runs the Collins perceptron training on the input training data.
     
-    labels - Path to the file containing the training labels.
-    sentences - Path to the file containing training sentences.
+    labels - All training, validation labels.
+    sentences - All training, validation sentences.
     pct_train - Percentage of examples from data set to use as training data.
              The rest are used as validation data.
     """
-    
-    # load shuffled data sets
-    train_labels, train_sentences, validation_labels, validation_sentences = sr.shuffle_examples(train_labels_f, train_sentences_f, pct_train)
     
     # get J, the total number of feature functions
     J = ffs.calcJ()
     print 'J = ',J
     
     # now run it
+    scores = []
     w0 = np.zeros(J)
-    # run until converged, according to 
-    w1 = collins_epoch(train_labels[:1000], train_sentences[:1000], np.zeros(J))
+    scores.append(sr.general_score(w0,validation_labels,validation_sentences,'word',0))
+    # run until converged, according to score on validation set
+    nep = 1
+    epoch_time = []
+    
+    while True:
+        t0 = time.time()
+        # get the new weights & score
+        w1 = collins_epoch(train_labels, train_sentences, w0)
+        w0 = w1
+        scores.append(sr.general_score(w1,validation_labels,validation_sentences,'word',0))
+        epoch_time.append(time.time() - t0)
+        
+        # decide if converged
+        if scores[nep] < scores[nep-1]:
+            break
+        
+        nep += 1
     
     """
     # make a prediction on a dummy sentence
@@ -42,9 +56,8 @@ def collins(train_labels_f, train_sentences_f, test_labels_f, test_sentences_f,
     y_best = sr.bestlabel(U_dummy,g_dummy)
     """
     
-    print y_best
-    
-    exit(0)
+    # now return final weights, score time series, and epoch timing
+    return w1, scores, epoch_time
 
 def collins_epoch(train_labels, train_sentences, w0):
     """
