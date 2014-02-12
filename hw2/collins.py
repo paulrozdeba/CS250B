@@ -28,24 +28,33 @@ def collins(train_labels, train_sentences, validation_labels,
     # now run it
     scores = []
     w0 = np.zeros(J)
-    scores.append(sr.general_score(w0,validation_labels,validation_sentences,'word',0))
+    print 'Calculating initial score...'
+    scores.append(sr.score_by_word(w0,validation_labels,validation_sentences))
+    print 'Done!\n'
     # run until converged, according to score on validation set
     nep = 1
     epoch_time = []
     
+    print 'Initiating Collins perceptron training.'
     while True:
+        print 'Epoch #',nep,'...'
         t0 = time.time()
         # get the new weights & score
+        print 'Training...'
         w1 = collins_epoch(train_labels, train_sentences, w0)
         w0 = w1
+        print 'Done.\n'
+        print 'Calculating new score...'
         scores.append(sr.general_score(w1,validation_labels,validation_sentences,'word',0))
         epoch_time.append(time.time() - t0)
+        print 'Done.\n'
         
         # decide if converged
         if scores[nep] < scores[nep-1]:
             break
         
         nep += 1
+    print 'Training complete!\n'
     
     """
     # make a prediction on a dummy sentence
@@ -76,15 +85,15 @@ def collins_epoch(train_labels, train_sentences, w0):
     #w[0] = w0
     
     # pick out a random subset of training examples
-    sentences_self = train_sentences[:100]
-    labels_self = train_labels[:100]
+    #sentences_self = train_sentences[:100]
+    #labels_self = train_labels[:100]
     
     # track average number of true feature functions
     av_true = 0.0
     nevals = 0.0
     
     for nex,(sentence,label) in enumerate(zip(train_sentences,train_labels)):
-        if (nex+1)%100 == 0:
+        if (nex+1)%1000 == 0:
             print nex + 1
         
         # first, calculate g

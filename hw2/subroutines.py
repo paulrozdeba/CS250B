@@ -168,9 +168,10 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
     N_validate = len(score_labels)
     N_words = 0.0
     Num_correct = 0.0
-    for i in range(N_validate):
-        y = score_labels[i]
-        x = score_sentences[i]
+    #for i in range(N_validate):
+    for i,(x,y) in enumerate(zip(score_sentences,score_labels)):
+        if (i+1)%1000 == 0:
+            print 'Validation ex: ',i+1
         N_words += len(x)
         g_test = g(weights,x)
         U_test = U(g_test)
@@ -178,8 +179,8 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
             y_predict = bestlabel(U_test,g_test)
         else:
             y_predict = dummy_predict(x)
-        for j in range(len(y)):
-            if(y[j] == y_predict[j]):
+        for tag_true,tag_best in zip(y,y_predict):
+            if(tag_true == tag_best):
                 Num_correct += 1.0
     return Num_correct/N_words
 
