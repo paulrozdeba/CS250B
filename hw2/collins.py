@@ -24,14 +24,6 @@ def collins(train_labels_f, train_sentences_f, test_labels_f, test_sentences_f,
     # load shuffled data sets
     train_labels, train_sentences, validation_labels, validation_sentences = sr.shuffle_examples(train_labels_f, train_sentences_f, pct_train)
     
-    # load dictionary of tags <--> ints
-    tag_dict = dp.export_dict()
-    tag_dict['START'] = 0
-    tag_dict['STOP'] = 1
-    tag_dict_inverse = dp.export_dict_inverse()
-    tag_dict_inverse[0] = 'START'
-    tag_dict_inverse[1] = 'STOP'
-    
     # get J, the total number of feature functions
     J = ffs.calcJ()
     print 'J = ',J
