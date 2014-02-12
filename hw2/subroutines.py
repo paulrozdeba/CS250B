@@ -7,6 +7,7 @@ Contains several routines
 import numpy as np
 import itertools as it
 import ffs
+import dataproc as dp
 
 def g(w, x):
     """
@@ -235,21 +236,19 @@ def general_score(weights,score_labels,score_sentences,method,dummy):
     elif (method=='sentence'):
         return score_by_sentence(weights,score_labels,score_sentences,dummy)
 
-def shuffle_examples(labels, sentences, pct_train=0.5, Nex=None):
+def shuffle_examples(labels, sentences, pct_train=0.5):
     """
     Shuffles training examples and splits into trainin and validation sets.
 
     labels, sentences - File names pointing to data sets.
     pct_train - Pctge of data to keep at training data. The rest 
                 becomes validation data.
-    Nex - Number of examples from original data, TOTAL, to use.
     """
     
     # first import the training data
     train_labels_ordered = dp.labels_as_ints(labels)
     train_sentences_ordered = dp.import_sentences(sentences)
-    if Nex == None:
-        Nex = len(labels)
+    Nex = len(train_labels_ordered)
     Ntrain = int(pct_train*Nex + 1)
     
     # split into training and validation sets
@@ -257,7 +256,10 @@ def shuffle_examples(labels, sentences, pct_train=0.5, Nex=None):
     train_sentences = []
     validation_labels = []
     validation_sentences = []
-    examples = np.random.shuffle(np.arange(0,Nex,dtype='int'))
+    
+    np.random.seed(1987)
+    examples = np.arange(0,Nex,dtype='int')
+    np.random.shuffle(examples)
     train_examples = examples[:Ntrain]
     validation_examples = examples[Ntrain:]
     
