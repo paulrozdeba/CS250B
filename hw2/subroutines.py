@@ -172,7 +172,6 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
         x = score_sentences[i]
         N_words += len(x)
         g_test = g(weights,x)
-        #print g_test
         U_test = U(g_test)
         if(dummy==0):
             y_predict = bestlabel(U_test,g_test)
@@ -235,3 +234,38 @@ def general_score(weights,score_labels,score_sentences,method,dummy):
         return score_by_word(weights,score_labels,score_sentences,dummy)
     elif (method=='sentence'):
         return score_by_sentence(weights,score_labels,score_sentences,dummy)
+
+def shuffle_examples(labels, sentences, pct_train=0.5, Nex=None):
+    """
+    Shuffles training examples and splits into trainin and validation sets.
+
+    labels, sentences - File names pointing to data sets.
+    pct_train - Pctge of data to keep at training data. The rest 
+                becomes validation data.
+    Nex - Number of examples from original data, TOTAL, to use.
+    """
+    
+    # first import the training data
+    train_labels_ordered = dp.labels_as_ints(train_labels)
+    train_sentences_ordered = dp.import_sentences(train_sentences)
+    if Nex == None:
+        Nex = len(train_labels)
+    Ntrain = int(pct_train*Nex + 1)
+    
+    # split into training and validation sets
+    train_labels = []
+    train_sentences = []
+    validation_labels = []
+    validation_sentences = []
+    examples = np.random.shuffle(np.arange(0,Nex,dtype='int'))
+    train_examples = examples[:Ntrain]
+    validation_examples = examples[Ntrain:]
+    
+    for tex in train_examples:
+        train_labels.append(train_labels_ordered[tex])
+        train_sentences.append(train_sentences_ordered[tex])
+    for vec in validation_examples:
+        validation_labels.append(train_labels_ordered[vex])
+        validation_sentences.append(train_sentences_ordered[vex])
+    
+    return train_labels, train_sentences, validation_labels, validation_sentences
