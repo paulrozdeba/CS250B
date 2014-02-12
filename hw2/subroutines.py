@@ -246,10 +246,10 @@ def shuffle_examples(labels, sentences, pct_train=0.5, Nex=None):
     """
     
     # first import the training data
-    train_labels_ordered = dp.labels_as_ints(train_labels)
-    train_sentences_ordered = dp.import_sentences(train_sentences)
+    train_labels_ordered = dp.labels_as_ints(labels)
+    train_sentences_ordered = dp.import_sentences(sentences)
     if Nex == None:
-        Nex = len(train_labels)
+        Nex = len(labels)
     Ntrain = int(pct_train*Nex + 1)
     
     # split into training and validation sets
@@ -264,7 +264,7 @@ def shuffle_examples(labels, sentences, pct_train=0.5, Nex=None):
     for tex in train_examples:
         train_labels.append(train_labels_ordered[tex])
         train_sentences.append(train_sentences_ordered[tex])
-    for vec in validation_examples:
+    for vex in validation_examples:
         validation_labels.append(train_labels_ordered[vex])
         validation_sentences.append(train_sentences_ordered[vex])
     
