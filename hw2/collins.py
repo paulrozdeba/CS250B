@@ -10,10 +10,38 @@ import dataproc as dp
 import ffs
 import time
 
-def main():
+def collins(train_labels, train_sentences, test_labels, test_sentences, 
+            pct_train=None):
+    """
+    Runs the Collins perceptron training on the input training data.
+
+    labels - Path to the file containing the training labels.
+    sentences - Path to the file containing training sentences.
+    pct_train - Percentage of examples from data set to use as training data.
+             The rest are used as validation data.
+    """
+    
     # first import the training data
-    train_labels = dp.labels_as_ints('dataset/trainingLabels.txt')
-    train_sentences = dp.import_sentences('dataset/trainingSentences.txt')
+    train_labels_ordered = dp.labels_as_ints(train_labels)
+    train_sentences_ordered = dp.import_sentences(train_sentences)
+    Nex = len(train_labels)
+    Ntrain = int(pct_train*Nex + 1)
+    
+    # split into training and validation sets
+    train_labels = []
+    train_sentences = []
+    validation_labels = []
+    validation_sentences = []
+    examples = np.random.shuffle(np.arange(0,Nex,dtype='int'))
+    train_examples = examples[:Ntrain]
+    validation_examples = examples[Ntrain:]
+    
+    for tex in train_examples:
+        train_labels.append(train_labels_ordered[tex])
+        train_sentences.append(train_sentences_ordered[tex])
+    for vec in validation_examples:
+        validation_labels.append(train_labels_ordered[vex])
+        validation_sentences.append(train_sentences_ordered[vex])
     
     # load dictionary of tags <--> ints
     tag_dict = dp.export_dict()
@@ -28,13 +56,18 @@ def main():
     print 'J = ',J
     
     # now run it
-    w = collins_epoch(train_labels, train_sentences, np.zeros(J))
+    w0 = np.zeros(J)
+    # run until converged, according to 
+    w1 = collins_epoch(train_labels[:1000], train_sentences[:1000], np.zeros(J))
     
+    """
     # make a prediction on a dummy sentence
-    dummy = ['FIRSTWORD','I','like','cheese','but','I','also','like','bread','LASTWORD']
+    #dummy = ['FIRSTWORD','I','like','cheese','but','I','also','like','bread','LASTWORD']
+    dummy = ['FIRSTWORD','Do','you','like','cheese','LASTWORD']
     g_dummy = sr.g(w,dummy)
     U_dummy = sr.U(g_dummy)
     y_best = sr.bestlabel(U_dummy,g_dummy)
+    """
     
     print y_best
     
