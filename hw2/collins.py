@@ -26,25 +26,13 @@ def main():
     # get J, the total number of feature functions
     J = ffs.calcJ()
     print 'J = ',J
-    #J = 2832
-    
-    """
-    # test for last tag indicator
-    testsent = ['FIRSTWORD','Boom','LASTWORD']
-    testlab = [0, 2, 1]
-    x_info = ffs.sent_precheck(testsent)
-    ffs.metaff(testlab[-2],testlab[-1],x_info,2)
-    for i,(m1,m2) in enumerate(zip(testlab[0:-2],testlab[1:])):
-        trueFF = ffs.metaff(m1,m2,x_info,i+1)
-    """
     
     # now run it
-    w = collins_epoch(train_labels[:1000], train_sentences[:1000], np.zeros(J))
-    print w[-1]
+    w = collins_epoch(train_labels, train_sentences, np.zeros(J))
     
     # make a prediction on a dummy sentence
-    dummy = ['FIRSTWORD','How','are','you','doing','LASTWORD']
-    g_dummy = sr.g(w[-1],dummy)
+    dummy = ['FIRSTWORD','I','like','cheese','but','I','also','like','bread','LASTWORD']
+    g_dummy = sr.g(w,dummy)
     U_dummy = sr.U(g_dummy)
     y_best = sr.bestlabel(U_dummy,g_dummy)
     
@@ -65,12 +53,16 @@ def collins_epoch(train_labels, train_sentences, w0):
     Ntrain = len(train_sentences)  # number of training examples
     assert(Ntrain == len(train_labels))
     J = len(w0)  # number of parameters, equal to number of feature functions
-    w = np.zeros(shape=(Ntrain+1,J))  # to store the parameter trajectory
-    w[0] = w0
+    #w = np.zeros(shape=(Ntrain+1,J))  # to store the parameter trajectory
+    #w[0] = w0
+    
+    # pick out a random subset of training examples
+    sentences_self = train_sentences[:100]
+    labels_self = train_labels[:100]
     
     # track average number of true feature functions
-    av_true = 0
-    nevals = 0
+    av_true = 0.0
+    nevals = 0.0
     
     for nex,(sentence,label) in enumerate(zip(train_sentences,train_labels)):
         if (nex+1)%100 == 0:
@@ -86,25 +78,27 @@ def collins_epoch(train_labels, train_sentences, w0):
         y_best = sr.bestlabel(U_ex,g_ex)
         
         # update the weight
-        w[nex+1] = w[nex]
+        #w[nex+1] = w[nex]
         x_info = ffs.sent_precheck(sentence)
         
         for i,(m1,m2,b1,b2) in enumerate(zip(label[:-1],label[1:],y_best[:-1],y_best[1:])):
             trueFF = ffs.metaff(m1,m2,x_info,i+1)
             bestFF = ffs.metaff(b1,b2,x_info,i+1)
             
-            av_true += len(trueFF)
-            nevals += 1
+            av_true += float(len(trueFF))
+            nevals += 1.0
             
             for j in trueFF:
-                w[nex+1,j] += 1
+                #w[nex+1,j] += 1
+                w0[j] += 1
             for j in bestFF:
-                w[nex+1,j] -= 1
+                #w[nex+1,j] -= 1
+                w0[j] -= 1
                 #continue
     
     print 'Average number of true FF\'s: ',(av_true/nevals)
     
-    return w
+    return w0
         
 
 ################################################################################

@@ -198,7 +198,7 @@ def score_by_sentence(weights,score_labels,score_sentences,dummy=0):
         else:
             y_predict = dummy_predict(x)
         if(y==y_predict):
-            num_correct += 1
+            num_correct += 1.0
     return num_correct / float(N_validate)
 
 def score_by_mark(weights,score_labels,score_sentences,dummy=0):
@@ -207,9 +207,20 @@ def score_by_mark(weights,score_labels,score_sentences,dummy=0):
     predicted
     """
     N_validate = len(score_labels)
-    N_present = np.zeros(8)
-    N_matched = np.zeros(8)
-    
+    score_mat = np.zeros((8,8))
+    predict_totals = np.zeros(8)
+    true_totals = np.zeros(8)
+    for i in range(N_validate):
+        y = score_labels[i]
+        x = score_sentences[i]
+        g_test = g(weights,x)
+        U_test = U(g)
+        if(dummy==0):
+            y_predict = bestlabel(U_test,g_test)
+        else:
+            y_predict = dummy_predict(x)
+        for i in range(len(y)):
+            score_mat[y[i],y_predict[i]] += 1.0
     for i in range(8):
-        N_p
-    return score_array
+        
+    return score_mat
