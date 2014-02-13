@@ -1,0 +1,4 @@
+Method: collins, Scoretype: word
+25\%: 0.9
+50\%: 0.9
+75\%: 1.0

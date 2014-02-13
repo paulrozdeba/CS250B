@@ -1,0 +1,4 @@
+Method: sgd, Scoretype: sentence
+25\%: 0.0
+50\%: 0.0
+75\%: 0.0
