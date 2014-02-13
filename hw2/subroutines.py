@@ -168,7 +168,7 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
     N_validate = len(score_labels)
     N_words = 0.0
     Num_correct = 0.0
-    #for i in range(N_validate):
+    
     for i,(x,y) in enumerate(zip(score_sentences,score_labels)):
         if (i+1)%1000 == 0:
             print 'Validation ex: ',i+1
@@ -190,9 +190,10 @@ def score_by_sentence(weights,score_labels,score_sentences,dummy):
     """
     N_validate = len(score_labels)
     num_correct = 0.0
-    for i in range(N_validate):
-        y = score_labels[i]
-        x = score_sentences[i]
+    
+    for i,(x,y) in enumerate(zip(score_sentences,score_labels)):
+        if (i+1)%1000 == 0:
+            print 'Validation ex: ',i+1
         g_test = g(weights,x)
         U_test = U(g_test)
         if(dummy==0):
@@ -211,23 +212,27 @@ def score_by_mark(weights,score_labels,score_sentences,dummy):
     score_mat = np.zeros((8,8))
     predict_totals = np.zeros(8)
     true_totals = np.zeros(8)
-    percentage_mat = np.zeros(8)
+    percentage_mat = np.zeros((8,8))
     accuracy_vec = np.zeros(8)
-    for i in range(N_validate):
-        y = score_labels[i]
-        x = score_sentences[i]
+    
+    for i,(x,y) in enumerate(zip(score_sentences,score_labels)):
+        if (i+1)%1000 == 0:
+            print 'Validation ex: ',i+1
         g_test = g(weights,x)
         U_test = U(g_test)
         if(dummy==0):
             y_predict = bestlabel(U_test,g_test)
         else:
             y_predict = dummy_predict(x)
-        for i in range(len(y)):
-            score_mat[y[i],y_predict[i]] += 1.0
+        for tag_true,tag_best in zip(y,y_predict):
+            score_mat[tag_true,tag_best] += 1.0
+
     predict_totals = np.sum(score_mat,axis=0)
     true_totals = np.sum(score_mat,axis=1)
+    
     for i in range(8):
-        percentage_mat[i,:] = score_mat / true_totals[i]
+        print score_mat[i], true_totals[i]
+        percentage_mat[i] = score_mat[i] / true_totals[i]
         accuracy_vec[i] = percentage_mat[i,i]
     return percentage_mat,accuracy_vec
 

@@ -24,8 +24,8 @@ weights_0p75 = np.load('training_output/'+method+'_w_0p75.npy')
 weights = [weights_0p25, weights_0p5, weights_0p75]
 
 # load the test data
-test_labels = dp.labels_as_ints('dataset/testLabels.txt')[:1]
-test_sentences = dp.import_sentences('dataset/testSentences.txt')[:1]
+test_labels = dp.labels_as_ints('dataset/testLabels.txt')
+test_sentences = dp.import_sentences('dataset/testSentences.txt')
 
 # calculate the scores
 score = []
