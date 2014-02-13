@@ -18,9 +18,14 @@ else:
     dummy = 0
 
 # load weights
-weights_0p25 = np.load('training_output/'+method+'_w_0p25.npy')
-weights_0p5 = np.load('training_output/'+method+'_w_0p5.npy')
-weights_0p75 = np.load('training_output/'+method+'_w_0p75.npy')
+if method != 'dummy':
+    weights_0p25 = np.load('training_output/'+method+'_w_0p25.npy')
+    weights_0p5 = np.load('training_output/'+method+'_w_0p5.npy')
+    weights_0p75 = np.load('training_output/'+method+'_w_0p75.npy')
+else:
+    weights_0p25 = np.load('training_output/collins_w_0p25.npy')
+    weights_0p5 = np.load('training_output/collins_w_0p5.npy')
+    weights_0p75 = np.load('training_output/collins_w_0p75.npy')
 weights = [weights_0p25, weights_0p5, weights_0p75]
 
 # load the test data

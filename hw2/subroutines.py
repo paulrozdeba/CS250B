@@ -159,7 +159,7 @@ def dummy_predict(x):
             y.append(1)
         else:
             y.append(2)
-    return y_dummy
+    return y
 
 def score_by_word(weights,score_labels,score_sentences,dummy=0):
     """
@@ -173,9 +173,9 @@ def score_by_word(weights,score_labels,score_sentences,dummy=0):
         if (i+1)%1000 == 0:
             print 'Validation ex: ',i+1
         N_words += len(x)
-        g_test = g(weights,x)
-        U_test = U(g_test)
         if(dummy==0):
+            g_test = g(weights,x)
+            U_test = U(g_test)
             y_predict = bestlabel(U_test,g_test)
         else:
             y_predict = dummy_predict(x)
@@ -194,9 +194,9 @@ def score_by_sentence(weights,score_labels,score_sentences,dummy):
     for i,(x,y) in enumerate(zip(score_sentences,score_labels)):
         if (i+1)%1000 == 0:
             print 'Validation ex: ',i+1
-        g_test = g(weights,x)
-        U_test = U(g_test)
         if(dummy==0):
+            g_test = g(weights,x)
+            U_test = U(g_test)
             y_predict = bestlabel(U_test,g_test)
         else:
             y_predict = dummy_predict(x)
@@ -218,9 +218,9 @@ def score_by_mark(weights,score_labels,score_sentences,dummy):
     for i,(x,y) in enumerate(zip(score_sentences,score_labels)):
         if (i+1)%1000 == 0:
             print 'Validation ex: ',i+1
-        g_test = g(weights,x)
-        U_test = U(g_test)
         if(dummy==0):
+            g_test = g(weights,x)
+            U_test = U(g_test)
             y_predict = bestlabel(U_test,g_test)
         else:
             y_predict = dummy_predict(x)
