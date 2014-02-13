@@ -42,18 +42,22 @@ def collins(train_labels, train_sentences, validation_labels,
         # get the new weights & score
         print 'Training...'
         w1 = collins_epoch(train_labels, train_sentences, w0)
-        w0 = w1
         print 'Done.\n'
+        epoch_time.append([time.time() - t0])
+        
+        t0 = time.time()
         print 'Calculating new score...'
         scores.append(sr.general_score(w1,validation_labels,validation_sentences,'word',0))
-        epoch_time.append(time.time() - t0)
         print 'Done.\n'
+        epoch_time[nep-1].append(time.time() - t0)
         
         # decide if converged
         if scores[nep] < scores[nep-1]:
             break
-        
+        else:
+            w0 = w1
         nep += 1
+        
     print 'Training complete!\n'
     
     """
@@ -66,7 +70,7 @@ def collins(train_labels, train_sentences, validation_labels,
     """
     
     # now return final weights, score time series, and epoch timing
-    return w1, scores, epoch_time
+    return w0, scores, epoch_time
 
 def collins_epoch(train_labels, train_sentences, w0):
     """

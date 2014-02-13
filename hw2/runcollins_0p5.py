@@ -1,6 +1,7 @@
 import collins
 import subroutines as sr
 import dataproc as dp
+import numpy as np
 
 # first load and shuffle the data
 train_labels_og = './dataset/trainingLabels.txt'
