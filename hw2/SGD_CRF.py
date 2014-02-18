@@ -9,7 +9,7 @@ import dataproc as dp
 import collins as collins
 import time
 
-def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_sentences,method):
+def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_sentences,method,lr=0.1):
     """
     The main subroutine for training by SGD training, train_labels and
     train_sentence are list of lists of corresponding (y,x) pairs.
@@ -18,7 +18,7 @@ def SGD_train(train_labels,train_sentences,max_epoch,validate_labels,validate_se
     """
     #max_epoch = 5
     converged = 0
-    lr = 0.1
+    #lr = 0.1
     avg_time_per_epoch = 0.0
     score_list = []
     num_training = len(train_sentences)
@@ -109,3 +109,30 @@ def compute_gradient(x,y,w,dw):
         for j in trueFF:
                     dw[j] += 1
     return dw
+
+def grid_search():
+    """
+    Do a grid search over lambda for the optimal learning rate.
+    """
+    
+    lambdas = [1e2, 1e3, 1e4, 1e5]
+    
+    # load data
+    train_labels_og = './dataset/trainingLabels.txt'
+    train_sentences_og = './dataset/trainingSentences.txt'
+    
+    train_labels, train_sentences, validation_labels, validation_sentences = sr.shuffle_examples(train_labels_og, train_sentences_og, pct_train=0.5)
+    
+    gridfile = open('gridsearch_results.txt', 'w')
+    # run over values of lambda
+    for lr in lambdas:
+        print lr
+        weights, scores, epoch, ept_avg = SGD_train(train_labels[:100], 
+                                                    train_sentences[:100], 20, 
+                                                    validation_labels[:100], 
+                                                    validation_sentences[:100], 
+                                                    'word', lr)
+        print scores
+        gridfile.write(str(scores[-2]) + '\n')
+    
+    gridfile.close()
