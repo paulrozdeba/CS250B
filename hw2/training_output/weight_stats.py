@@ -22,7 +22,12 @@ pc_0p25 = stats.pearsonr(collins_0p25, sgd_0p25)
 pc_0p5 = stats.pearsonr(collins_0p5, sgd_0p5)
 pc_0p75 = stats.pearsonr(collins_0p75, sgd_0p75)
 
-filenames = ['scatter_0p25.png','scatter_0p5.png','scatter_0p75.png']
+print 'Pearson correlation:\n'
+print '25\%: ',pc_0p25
+print '50\%: ',pc_0p5
+print '75\%: ',pc_0p75
+
+filenames = ['scatter_0p25.pdf','scatter_0p5.pdf','scatter_0p75.pdf']
 titles = [r'.25/.75 training/validation', r'.50/.50 training/validation', 
             r'.75/.25 training/validation']
 
