@@ -35,12 +35,21 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                 v = voc_idx[bi]
                 newp = prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, 
                                 m, v, bi)
-                bestz = newp.index(max(newp))
+                
+                # now draw a number btwn 0 and 1, and draw based on newp
+                draw = np.random.rand()
+                int_hi = 0.0
+                for topic,topic_prob in enumerate(newp):
+                    int_hi += topic_prob
+                    if draw < int_hi:
+                        znew = topic
+                        break
+                
                 # update q,n
                 q[bi,zi] -= 1
-                q[bi,bestz] += 1
+                q[bi,znew] += 1
                 n[m,zi] -= 1
-                n[m,bestz] += 1
+                n[m,znew] += 1
     
     return q, n
 
