@@ -6,6 +6,7 @@ Code is split up so individual epochs can be run over the data set.
 """
 
 import numpy as np
+import time
 
 def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
     """
@@ -28,7 +29,11 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
     K = len(q[0])  # cardinality of the topic space
     
     # loop through the topic vector for entire corpus
+    t0 = time.time()
     for bi,word in enumerate(q):
+        if (bi+1)%100 == 0:
+            print 'step '+str(bi+1)+',', 'time: ' + str(time.time()-t0) + ' s'
+            t0 = time.time()
         for zi,count in enumerate(word):
             if count == 0:
                 continue
@@ -41,6 +46,7 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                     # now draw a number btwn 0 and 1, and draw based on newp
                     draw = np.random.rand()
                     int_hi = 0.0
+                    znew = K-1  # in case a high number is drawn below
                     for topic,topic_prob in enumerate(newp):
                         int_hi += topic_prob
                         if draw < int_hi:
@@ -48,10 +54,10 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                             break
                     
                     # update q,n
-                    q[bi,zi] -= 1
-                    q[bi,znew] += 1
-                    n[m,zi] -= 1
-                    n[m,znew] += 1
+                    q[bi][zi] -= 1
+                    q[bi][znew] += 1
+                    n[m][zi] -= 1
+                    n[m][znew] += 1
     
     return q, n
 
@@ -97,7 +103,7 @@ def prob(j, zi, q, n, alpha, beta, voc_idx, m, v, b):
         if vi == v:
             num1 += elem.count(j)
     
-    num2 = alpha[m] + n[m].count(j)
+    num2 = alpha[j] + n[m].count(j)
     den2 = sum(alpha)
     for doc in n:
         den2 += doc.count(j)
@@ -127,6 +133,7 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
         vector for the *entire* corpus.
     """
     
+    """
     # first pop the q and n entries for *this* word and *this* document
     # If the m,zi element of n is not zero, then at least this word was assigned 
     # with topic z.
@@ -135,6 +142,7 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
     # Same logic here, for q.
     if q[b,zi] > 0:
         q[b,zi] -= 1
+    """
     
     pvec = []
     # start calculating
@@ -146,7 +154,7 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
             if vi == v:
                 num1 += elem.count(j)
         
-        num2 = alpha[m] + n[m].count(j)
+        num2 = alpha[j] + n[m].count(j)
         den2 = sum(alpha)
         for doc in n:
             den2 += doc.count(j)
