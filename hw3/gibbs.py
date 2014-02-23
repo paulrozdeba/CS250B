@@ -87,21 +87,21 @@ def prob(j, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
         q[b,zi] -= 1
     
     # start calculating
-    num1 = 0
+    num1 = beta[vi]
     den1 = 0
     for vi,elem in zip(voc_idx,q):
         den1 += elem.count(j) + beta[vi]
         if vi == v:
-            num1 += elem.count(j) + beta[vi]
+            num1 += elem.count(j)
     
-    num2 = 0
+    num2 = alpha[mi]
     den2 = 0
     for mi,doc in zip(doc_idx,n):
         den2 += doc.count(j) + alpha[mi]
         if mi == m:
-            num2 += doc.count(j) + alpha[mi]
+            num2 += doc.count(j)
     
-    return (num1*num2) / (den1*den2)
+    return (num1 * num2 / den1 / den2)
 
 def prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     """
@@ -139,19 +139,19 @@ def prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     pvec = []
     # start calculating
     for j in range(K):
-        num1 = 0
+        num1 = beta[vi]
         den1 = 0
         for vi,elem in zip(voc_idx,q):
             den1 += elem.count(j) + beta[vi]
             if vi == v:
-                num1 += elem.count(j) + beta[vi]
+                num1 += elem.count(j)
         
-        num2 = 0
+        num2 = alpha[mi]
         den2 = 0
         for mi,doc in zip(doc_idx,n):
             den2 += doc.count(j) + alpha[mi]
             if mi == m:
-                num2 += doc.count(j) + alpha[mi]
+                num2 += doc.count(j)
         
         pvec.append(num1 * num2 / den1 / den2)
     
