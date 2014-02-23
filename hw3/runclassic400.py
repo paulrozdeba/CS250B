@@ -15,3 +15,11 @@ classic400data = datadict['classic400']
 doc_idx, vocab_idx = classic400data.nonzero()  # load doc, vocab indices
 counts = classic400data.data  # load counts
 
+K = 3  # cardinality of topic space
+
+# Now randomly initialize q,n based on data
+q = np.zeros(len(counts),K)
+n = np.zeros(
+
+for bi,count in enumerate(counts):
+    

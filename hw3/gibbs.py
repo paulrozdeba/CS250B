@@ -17,9 +17,9 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
             Each entry is a list of topic assignment counts.  This list should 
             sum to the total count for that vocab word, in that document.
     q - List of lists of topic counts, by vocab word.  Each entry is a list of 
-        topic assignment counts, listed by topic.
+        topic assignment counts, in order of topics.
     n - List of lists of topic assignments, by document.  Each entry is a list 
-        of topic counts, listed by topic.
+        of topic counts, in order of topics.
     alpha, beta - Prior Dirichlet distritbution parameters.
     doc_idx - List of document indices per 0-th entry of q.
     voc_idx - List of vocab indices per 0-th entry of q.
@@ -30,30 +30,32 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
     # loop through the topic vector for entire corpus
     for bi,word in enumerate(q):
         for zi,count in enumerate(word):
-            for wi in range(count):
-                m = doc_idx[bi]
-                v = voc_idx[bi]
-                newp = prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, 
-                                m, v, bi)
-                
-                # now draw a number btwn 0 and 1, and draw based on newp
-                draw = np.random.rand()
-                int_hi = 0.0
-                for topic,topic_prob in enumerate(newp):
-                    int_hi += topic_prob
-                    if draw < int_hi:
-                        znew = topic
-                        break
-                
-                # update q,n
-                q[bi,zi] -= 1
-                q[bi,znew] += 1
-                n[m,zi] -= 1
-                n[m,znew] += 1
+            if count == 0:
+                continue
+            else:
+                for wi in range(count):
+                    m = doc_idx[bi]
+                    v = voc_idx[bi]
+                    newp = prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, bi)
+                    
+                    # now draw a number btwn 0 and 1, and draw based on newp
+                    draw = np.random.rand()
+                    int_hi = 0.0
+                    for topic,topic_prob in enumerate(newp):
+                        int_hi += topic_prob
+                        if draw < int_hi:
+                            znew = topic
+                            break
+                    
+                    # update q,n
+                    q[bi,zi] -= 1
+                    q[bi,znew] += 1
+                    n[m,zi] -= 1
+                    n[m,znew] += 1
     
     return q, n
 
-def prob(j, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
+def prob(j, zi, q, n, alpha, beta, voc_idx, m, v, b):
     """
     Calculates the probability of topic j belonging to word i in document m.
     Calculation carried out term by term a la
@@ -69,7 +71,6 @@ def prob(j, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     n - List of lists of topic assignments, by document.  Each entry is a list 
         of topic counts, listed by topic.
     alpha, beta - Prior Dirichlet distritbution parameters.
-    doc_idx - List of document indices per 0-th entry of q.
     voc_idx - List of vocab indices per 0-th entry of q.
     m - This document's index.
     v - This word's vocabulary index.
@@ -77,6 +78,7 @@ def prob(j, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
         vector for the *entire* corpus.
     """
     
+    """
     # first pop the q and n entries for *this* word and *this* document
     # If the m,zi element of n is not zero, then at least this word was assigned 
     # with topic z.
@@ -85,25 +87,24 @@ def prob(j, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     # Same logic here, for q.
     if q[b,zi] > 0:
         q[b,zi] -= 1
+    """
     
     # start calculating
-    num1 = beta[vi]
+    num1 = beta[v]
     den1 = sum(beta)
     for vi,elem in zip(voc_idx,q):
         den1 += elem.count(j)
         if vi == v:
             num1 += elem.count(j)
     
-    num2 = alpha[mi]
+    num2 = alpha[m] + n[m].count(j)
     den2 = sum(alpha)
-    for mi,doc in zip(doc_idx,n):
+    for doc in n:
         den2 += doc.count(j)
-        if mi == m:
-            num2 += doc.count(j)
     
     return (num1 * num2 / den1 / den2)
 
-def prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
+def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
     """
     Calculates the probability of all topics belonging to word i in document m.
     Calculation carried out term by term a la
@@ -119,7 +120,6 @@ def prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     n - List of lists of topic assignments, by document.  Each entry is a list 
         of topic counts, listed by topic.
     alpha, beta - Prior Dirichlet distritbution parameters.
-    doc_idx - List of document indices per 0-th entry of q.
     voc_idx - List of vocab indices per 0-th entry of q.
     m - This document's index.
     v - This word's vocabulary index.
@@ -139,19 +139,17 @@ def prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     pvec = []
     # start calculating
     for j in range(K):
-        num1 = beta[vi]
+        num1 = beta[v]
         den1 = sum(beta)
         for vi,elem in zip(voc_idx,q):
             den1 += elem.count(j)
             if vi == v:
                 num1 += elem.count(j)
         
-        num2 = alpha[mi]
+        num2 = alpha[m] + n[m].count(j)
         den2 = sum(alpha)
-        for mi,doc in zip(doc_idx,n):
+        for doc in n:
             den2 += doc.count(j)
-            if mi == m:
-                num2 += doc.count(j)
         
         pvec.append(num1 * num2 / den1 / den2)
     
