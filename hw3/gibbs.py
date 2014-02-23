@@ -88,16 +88,16 @@ def prob(j, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     
     # start calculating
     num1 = beta[vi]
-    den1 = 0
+    den1 = sum(beta)
     for vi,elem in zip(voc_idx,q):
-        den1 += elem.count(j) + beta[vi]
+        den1 += elem.count(j)
         if vi == v:
             num1 += elem.count(j)
     
     num2 = alpha[mi]
-    den2 = 0
+    den2 = sum(alpha)
     for mi,doc in zip(doc_idx,n):
-        den2 += doc.count(j) + alpha[mi]
+        den2 += doc.count(j)
         if mi == m:
             num2 += doc.count(j)
     
@@ -140,16 +140,16 @@ def prob_vec(K, zi, q, n, alpha, beta, doc_idx, voc_idx, m, v, b):
     # start calculating
     for j in range(K):
         num1 = beta[vi]
-        den1 = 0
+        den1 = sum(beta)
         for vi,elem in zip(voc_idx,q):
-            den1 += elem.count(j) + beta[vi]
+            den1 += elem.count(j)
             if vi == v:
                 num1 += elem.count(j)
         
         num2 = alpha[mi]
-        den2 = 0
+        den2 = sum(alpha)
         for mi,doc in zip(doc_idx,n):
-            den2 += doc.count(j) + alpha[mi]
+            den2 += doc.count(j)
             if mi == m:
                 num2 += doc.count(j)
         
