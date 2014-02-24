@@ -48,6 +48,7 @@ def calc_phi(q,c_vec,voc_idx,V):
         for each word.  Constant across topic.  The sum across the elements
         should be much smaller than the size of any document.  Is also the beta
         parameter vector.
+    voc_idx - list of vocab indices
     V - the cardinality of the vocabulary
     """
     S = len(voc_idx)
@@ -59,7 +60,7 @@ def calc_phi(q,c_vec,voc_idx,V):
     for s in range(S):
         v = voc_idx[s]
         for k in range(K):
-            phi_mat[k,v] += q 
+            phi_mat[k,v] += q[s,k]
     
     topic_totals = np.sum(phi_mat,axis=1)
     
