@@ -6,9 +6,6 @@ Load & process matlab data.
 
 import scipy.io
 
-def loadsparse(fname):
-    """
-    Loads sparse matrix form matlab data.
-    """
+def loadmusic(fname):
     
-    datadict = scipy.io.loadmat(fname)
+
