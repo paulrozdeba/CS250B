@@ -39,11 +39,11 @@ for bi,(m,count) in enumerate(zip(doc_idx,counts)):
         n[m,zi] += subint
 
 # initialize alpha, beta
-alpha = [1]*K
-beta = [1]*V
+alpha = np.ones(K)
+beta = np.ones(V)
 
 # now run an epoch
-q,n = gibbs.gibbs_epoch(q.tolist(),n.tolist(),alpha,beta,doc_idx,voc_idx)
+q,n = gibbs.gibbs_epoch(q,n,alpha,beta,doc_idx,voc_idx)
 
 # save the results to file
 np.savetxt('data/classic400_q.dat',np.array(q),fmt='%d')
