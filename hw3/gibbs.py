@@ -48,69 +48,69 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                     # now draw a number btwn 0 and 1, and draw based on newp
                     draw = np.random.random_sample() * psum
                     int_hi = 0.0
--                    znew = K-1  # in case a high number is drawn below
--                    for topic,topic_prob in enumerate(newp):
--                        int_hi += topic_prob
--                        if draw < int_hi:
--                            znew = topic
--                            break
--                    
--                    # update q,n
--                    # Note that the -=1 steps are unnecessary, since this
--                    # already happens inside of prob_vec().
--                    #q[bi][zi] -= 1
--                    q[bi][znew] += 1
--                    #n[m][zi] -= 1
--                    n[m][znew] += 1
--    
--    return q, n
--
+                    znew = K-1  # in case a high number is drawn below
+                    for topic,topic_prob in enumerate(newp):
+                        int_hi += topic_prob
+                        if draw < int_hi:
+                            znew = topic
+                            break
+                    
+                    # update q,n
+                    # Note that the -=1 steps are unnecessary, since this
+                    # already happens inside of prob_vec().
+                    #q[bi][zi] -= 1
+                    q[bi][znew] += 1
+                    #n[m][zi] -= 1
+                    n[m][znew] += 1
+    
+    return q, n
+
 ### THE FUNCTION BELOW IS BROKEN, DO NOT USE ###
 def prob(j, zi, q, n, alpha, beta, voc_idx, m, v, b):
--    """
--    Calculates the probability of topic j belonging to word i in document m.
--    Calculation carried out term by term a la
--    
--    num1  *  num2
--    -------------
--    den1  *  den2
--    
--    j - Proposed topic index for this word.
--    zi - Topic assignment for this word.
--    q - List of lists of topic counts, by vocab word.  Each entry is a list of 
--        topic assignment counts, listed by topic.
--    n - List of lists of topic assignments, by document.  Each entry is a list 
--        of topic counts, listed by topic.
--    alpha, beta - Prior Dirichlet distritbution parameters.
--    voc_idx - List of vocab indices per 0-th entry of q.
--    m - This document's index.
--    v - This word's vocabulary index.
--    b - Bag index for q.  The bag index is the index in the bag-of-words
--        vector for the *entire* corpus.
--    """
--    
--    """
--    # first pop the q and n entries for *this* word and *this* document
--    # If the m,zi element of n is not zero, then at least this word was assigned 
--    # with topic z.
--    if n[m,zi] > 0:
--        n[m,zi] -= 1
--    # Same logic here, for q.
--    if q[b,zi] > 0:
--        q[b,zi] -= 1
--    """
--    
--    # start calculating
--    num1 = beta[v]
--    den1 = sum(beta)
--    for vi,elem in zip(voc_idx,q):
--        den1 += elem.count(j)
--        if vi == v:
--            num1 += elem.count(j)
--    
--    num2 = alpha[j] + n[m].count(j)
--    den2 = sum(alpha)
--    for doc in n:
+    """
+    Calculates the probability of topic j belonging to word i in document m.
+    Calculation carried out term by term a la
+    
+    num1  *  num2
+    -------------
+    den1  *  den2
+    
+    j - Proposed topic index for this word.
+    zi - Topic assignment for this word.
+    q - List of lists of topic counts, by vocab word.  Each entry is a list of 
+        topic assignment counts, listed by topic.
+    n - List of lists of topic assignments, by document.  Each entry is a list 
+        of topic counts, listed by topic.
+    alpha, beta - Prior Dirichlet distritbution parameters.
+    voc_idx - List of vocab indices per 0-th entry of q.
+    m - This document's index.
+    v - This word's vocabulary index.
+    b - Bag index for q.  The bag index is the index in the bag-of-words
+        vector for the *entire* corpus.
+    """
+    
+    """
+    # first pop the q and n entries for *this* word and *this* document
+    # If the m,zi element of n is not zero, then at least this word was assigned 
+    # with topic z.
+    if n[m,zi] > 0:
+        n[m,zi] -= 1
+    # Same logic here, for q.
+    if q[b,zi] > 0:
+        q[b,zi] -= 1
+    """
+    
+    # start calculating
+    num1 = beta[v]
+    den1 = sum(beta)
+    for vi,elem in zip(voc_idx,q):
+        den1 += elem.count(j)
+        if vi == v:
+            num1 += elem.count(j)
+    
+    num2 = alpha[j] + n[m].count(j)
+    den2 = sum(alpha)
+    for doc in n:
         den2 += doc.count(j)
     
     return (num1 * num2 / den1 / den2)
