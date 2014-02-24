@@ -26,31 +26,27 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
     voc_idx - List of vocab indices per 0-th entry of q.
     """
     
-    K = len(q[0])  # cardinality of the topic space
+    #K = len(q[0])  # cardinality of the topic space
+    K = q.shape[1]  # cardinality of the topic space
+    
+    #pvec = np.zeros(K)  # vector of probabilities
     
     # loop through the topic vector for entire corpus
+    print 'Starting an epoch...'
     t0 = time.time()
-    for bi,word in enumerate(q):
-        # timing
-        if (bi+1)%100 == 0:
-            print 'step '+str(bi+1)+',', 'time: ' + str(time.time()-t0) + ' s'
-            t0 = time.time()
-        # extract doc and vocab indices
-        m = doc_idx[bi]
-        v = voc_idx[bi]
-        
+    for m,v,(bi,word) in zip(doc_idx,voc_idx,enumerate(q)):
         for zi,count in enumerate(word):
-            if count == 0:
+            if count == 0.0:
                 continue
             else:
                 for wi in range(count):
-                    newp = prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, bi)
-                    psum = sum(newp)
+                    pvec = prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, bi)
+                    psum = np.sum(pvec)
                     
                     # now draw a number btwn 0 and 1, and draw based on newp
                     draw = np.random.random_sample() * psum
                     int_hi = 0.0
-                    for topic,topic_prob in enumerate(newp):
+                    for topic,topic_prob in enumerate(pvec):
                         int_hi += topic_prob
                         if draw < int_hi:
                             znew = topic
@@ -60,10 +56,10 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                     # Note that the -=1 steps are unnecessary, since this
                     # already happens inside of prob_vec().
                     #q[bi][zi] -= 1
-                    q[bi][znew] += 1
+                    q[bi,znew] += 1.0
                     #n[m][zi] -= 1
-                    n[m][znew] += 1
-    
+                    n[m,znew] += 1.0
+    print 'Epoch finished.  Time = ' + str(time.time()-t0)
     return q, n
 
 def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
@@ -100,10 +96,15 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
         q[b,zi] -= 1
     """
     # first pop the q and n entries for *this* word and *this* document
-    n[m][zi] -= 1
-    q[b][zi] -= 1
+    n[m,zi] -= 1.0
+    q[b,zi] -= 1.0
     
-    pvec = [0.0]*K
+    num1 = np.resize(beta[v],K) + np.sum(q[voc_idx==v],axis=0)
+    num2 = alpha + n[m]
+    den1 = np.resize(np.sum(beta),K) + np.sum(q,axis=0)
+    den2 = np.resize(np.sum(alpha),K) + np.sum(n,axis=0)
+    
+    """
     # start calculating
     for j in range(K):
         num1 = beta[v]
@@ -117,12 +118,8 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
         den2 = sum(alpha)
         for doc in n:
             den2 += doc[j]
-        
-        num1 = float(num1)
-        num2 = float(num2)
-        den1 = float(den1)
-        den2 = float(den2)
-        pvec[j] = num1 * num2 / den1 / den2
+    """    
+    pvec = num1 * num2 / den1 / den2
     
     return pvec
 
