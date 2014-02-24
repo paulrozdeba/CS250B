@@ -14,7 +14,7 @@ datadict = scipy.io.loadmat('data/classic400.mat')
 # Extract count data from dict, split into lists
 classic400data = datadict['classic400']
 doc_idx, voc_idx = classic400data.nonzero()  # load doc, vocab indices
-counts = classic400data.data[:100]  # load counts
+counts = classic400data.data[:1000]  # load counts
 
 K = 3  # cardinality of topic space
 M = 400  # number of documents
@@ -25,9 +25,7 @@ S = len(counts)  # number of nonzero elements in corpus
 q = np.zeros(shape=(S,K), dtype='int')
 n = np.zeros(shape=(M,K), dtype='int')
 
-for bi,count in enumerate(counts):
-    m = doc_idx[bi]
-    
+for bi,(m,count) in enumerate(zip(doc_idx,counts)):
     # To randomly assign topics, draw (K-1) ints from the uniform distribution 
     # over the interval [0,count).  The length of each sub-interval is the topic
     # count assigned to that element of the matrix (note that this
@@ -41,10 +39,12 @@ for bi,count in enumerate(counts):
         n[m,zi] += subint
 
 # initialize alpha, beta
-alpha = [3]*K
-beta = [3]*V
+alpha = [1]*K
+beta = [1]*V
 
 # now run an epoch
 q,n = gibbs.gibbs_epoch(q.tolist(),n.tolist(),alpha,beta,doc_idx,voc_idx)
 
 #print q
+print q
+print n

@@ -42,9 +42,11 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                     m = doc_idx[bi]
                     v = voc_idx[bi]
                     newp = prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, bi)
+                    psum = sum(newp)
+                    print newp
                     
                     # now draw a number btwn 0 and 1, and draw based on newp
-                    draw = np.random.rand()
+                    draw = np.random.random_sample() * psum
                     int_hi = 0.0
                     znew = K-1  # in case a high number is drawn below
                     for topic,topic_prob in enumerate(newp):
@@ -54,13 +56,16 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                             break
                     
                     # update q,n
-                    q[bi][zi] -= 1
+                    # Note that the -=1 steps are unnecessary, since this
+                    # already happens inside of prob_vec().
+                    #q[bi][zi] -= 1
                     q[bi][znew] += 1
-                    n[m][zi] -= 1
+                    #n[m][zi] -= 1
                     n[m][znew] += 1
     
     return q, n
 
+### THE FUNCTION BELOW IS BROKEN, DO NOT USE ###
 def prob(j, zi, q, n, alpha, beta, voc_idx, m, v, b):
     """
     Calculates the probability of topic j belonging to word i in document m.
@@ -143,6 +148,9 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
     if q[b,zi] > 0:
         q[b,zi] -= 1
     """
+    # first pop the q and n entries for *this* word and *this* document
+    n[m][zi] -= 1
+    q[b][zi] -= 1
     
     pvec = []
     # start calculating
@@ -150,15 +158,19 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
         num1 = beta[v]
         den1 = sum(beta)
         for vi,elem in zip(voc_idx,q):
-            den1 += elem.count(j)
+            den1 += elem[j]
             if vi == v:
-                num1 += elem.count(j)
+                num1 += elem[j]
         
-        num2 = alpha[j] + n[m].count(j)
+        num2 = alpha[j] + n[m][j]
         den2 = sum(alpha)
         for doc in n:
-            den2 += doc.count(j)
+            den2 += doc[j]
         
+        num1 = float(num1)
+        num2 = float(num2)
+        den1 = float(den1)
+        den2 = float(den2)
         pvec.append(num1 * num2 / den1 / den2)
     
     return pvec
