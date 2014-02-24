@@ -39,12 +39,23 @@ for bi,(m,count) in enumerate(zip(doc_idx,counts)):
         n[m,zi] += subint
 
 # initialize alpha, beta
-alpha = np.ones(K)
-beta = np.ones(V)
+afv = [0.1, 1.0, 10.0]
+bfv = [10.0, 1.0, 0.1]
+qfnamev = ['data/c400_q_a0p1_b10p0_K3.dat',
+          'data/c400_q_a1p0_b1p0_K3.dat',
+          'data/c400_q_a10p0_b0p1_K3.dat']
+nfnamev = ['data/c400_n_a0p1_b10p0_K3.dat',
+          'data/c400_n_a1p0_b1p0_K3.dat',
+          'data/c400_n_a10p0_b0p1_K3.dat']
 
-# now run an epoch
-q,n = gibbs.gibbs_epoch(q,n,alpha,beta,doc_idx,voc_idx)
-
-# save the results to file
-np.savetxt('data/classic400_q.dat',np.array(q),fmt='%d')
-np.savetxt('data/classic400_n.dat',np.array(n),fmt='%d')
+for af,bf,qfname,nfname in zip(afv,bfv,qfnamev,nfnamev):
+    alpha = af*np.ones(K)
+    beta = bf*np.ones(V)
+    
+    # now run 500 epochs
+    for nep in range(500):
+        q,n = gibbs.gibbs_epoch(q,n,alpha,beta,doc_idx,voc_idx)
+    
+    # save the results to file
+    np.savetxt(qfname,np.array(q),fmt='%d')
+    np.savetxt(nfname,np.array(n),fmt='%d')

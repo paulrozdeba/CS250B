@@ -26,21 +26,22 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
     voc_idx - List of vocab indices per 0-th entry of q.
     """
     
-    #K = len(q[0])  # cardinality of the topic space
     K = q.shape[1]  # cardinality of the topic space
-    
-    #pvec = np.zeros(K)  # vector of probabilities
+    alphasum = np.resize(np.sum(alpha),K)
+    betasum = np.resize(np.sum(beta),K)
     
     # loop through the topic vector for entire corpus
     print 'Starting an epoch...'
     t0 = time.time()
     for m,v,(bi,word) in zip(doc_idx,voc_idx,enumerate(q)):
+        beta_v = np.resize(beta[v],K)  # EFFICIENCY!!!!!
         for zi,count in enumerate(word):
-            if count == 0.0:
+            if count == 0.0:  # word doesn't exist
                 continue
             else:
                 for wi in range(count):
-                    pvec = prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, bi)
+                    pvec = prob_vec(K, zi, q, n, alpha, beta_v, 
+                                    alphasum, betasum, voc_idx, m, v, bi)
                     psum = np.sum(pvec)
                     
                     # now draw a number btwn 0 and 1, and draw based on newp
@@ -59,10 +60,11 @@ def gibbs_epoch(q, n, alpha, beta, doc_idx, voc_idx):
                     q[bi,znew] += 1.0
                     #n[m][zi] -= 1
                     n[m,znew] += 1.0
+    
     print 'Epoch finished.  Time = ' + str(time.time()-t0)
     return q, n
 
-def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
+def prob_vec(K, zi, q, n, alpha, beta_v, alphasum, betasum, voc_idx, m, v, b):
     """
     Calculates the probability of all topics belonging to word i in document m.
     Calculation carried out term by term a la
@@ -77,7 +79,8 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
         topic assignment counts, listed by topic.
     n - List of lists of topic assignments, by document.  Each entry is a list 
         of topic counts, listed by topic.
-    alpha, beta - Prior Dirichlet distritbution parameters.
+    alpha, beta_v - Prior Dirichlet distritbution parameters.
+    alphasum, betasum - Sums passed for efficiency.
     voc_idx - List of vocab indices per 0-th entry of q.
     m - This document's index.
     v - This word's vocabulary index.
@@ -85,43 +88,16 @@ def prob_vec(K, zi, q, n, alpha, beta, voc_idx, m, v, b):
         vector for the *entire* corpus.
     """
     
-    """
-    # first pop the q and n entries for *this* word and *this* document
-    # If the m,zi element of n is not zero, then at least this word was assigned 
-    # with topic z.
-    if n[m,zi] > 0:
-        n[m,zi] -= 1
-    # Same logic here, for q.
-    if q[b,zi] > 0:
-        q[b,zi] -= 1
-    """
     # first pop the q and n entries for *this* word and *this* document
     n[m,zi] -= 1.0
     q[b,zi] -= 1.0
     
-    num1 = np.resize(beta[v],K) + np.sum(q[voc_idx==v],axis=0)
+    num1 = beta_v + np.sum(q[voc_idx==v],axis=0)
     num2 = alpha + n[m]
-    den1 = np.resize(np.sum(beta),K) + np.sum(q,axis=0)
-    den2 = np.resize(np.sum(alpha),K) + np.sum(n,axis=0)
+    den1 = betasum + np.sum(q,axis=0)
+    den2 = alphasum + np.sum(n,axis=0)
     
-    """
-    # start calculating
-    for j in range(K):
-        num1 = beta[v]
-        den1 = sum(beta)
-        for vi,elem in zip(voc_idx,q):
-            den1 += elem[j]
-            if vi == v:
-                num1 += elem[j]
-        
-        num2 = alpha[j] + n[m][j]
-        den2 = sum(alpha)
-        for doc in n:
-            den2 += doc[j]
-    """    
-    pvec = num1 * num2 / den1 / den2
-    
-    return pvec
+    return num1 * num2 / den1 / den2
 
 ### THE FUNCTION BELOW IS BROKEN, DO NOT USE ###
 def prob(j, zi, q, n, alpha, beta, voc_idx, m, v, b):
