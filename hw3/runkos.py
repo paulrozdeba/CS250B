@@ -12,6 +12,10 @@ import sys
 # Load in the data
 kosdata = np.loadtxt('data/docword.kos.txt', dtype='float', skiprows=3)
 
+# randomly select 25000 data points
+np.random.shuffle(kosdata)
+kosdata = kosdata[:25000]
+
 # split into counts and indices
 doc_idx = kosdata[:,0] - 1
 voc_idx = kosdata[:,1] - 1
@@ -24,7 +28,7 @@ S = len(counts)  # number of nonzero elements
 # initialize hyperparameters
 #K = 3
 K = int(sys.argv[1])
-alpha = 1.0 * np.ones(K)
+alpha = 10.0 * np.ones(K)
 beta  = 1.0 * np.ones(V)
 
 # Now randomly initialize q,n based on data
@@ -44,7 +48,8 @@ for bi,(m,count) in enumerate(zip(doc_idx,counts)):
         q[bi,zi] += subint
         n[m,zi] += subint
 
-q,n = gibbs.gibbs_epoch(q,n,alpha,beta,doc_idx,voc_idx)
+for nep in range(500):
+    q,n = gibbs.gibbs_epoch(q,n,alpha,beta,doc_idx,voc_idx)
 
 qfname = 'data/kos_q_a1p0_b1p0_K'+str(K)+'.dat'
 nfname = 'data/kos_n_a1p0_b1p0_K'+str(K)+'.dat'
