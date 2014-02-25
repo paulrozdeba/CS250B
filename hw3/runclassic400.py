@@ -40,13 +40,13 @@ for bi,(m,count) in enumerate(zip(doc_idx,counts)):
 
 # initialize alpha, beta
 afv = [0.1, 1.0, 10.0]
-bfv = [10.0, 1.0, 0.1]
-qfnamev = ['data/c400_q_a0p1_b10p0_K3.dat',
-          'data/c400_q_a1p0_b1p0_K3.dat',
-          'data/c400_q_a10p0_b0p1_K3.dat']
-nfnamev = ['data/c400_n_a0p1_b10p0_K3.dat',
-          'data/c400_n_a1p0_b1p0_K3.dat',
-          'data/c400_n_a10p0_b0p1_K3.dat']
+bfv = [10000.0, 1000.0, 100.0]
+qfnamev = ['data/c400_q_a0p1_b10000p0_K3.dat',
+          'data/c400_q_a1p0_b1000p0_K3.dat',
+          'data/c400_q_a10p0_b100p0_K3.dat']
+nfnamev = ['data/c400_n_a0p1_b10000p0_K3.dat',
+          'data/c400_n_a1p0_b1000p0_K3.dat',
+          'data/c400_n_a10p0_b100p0_K3.dat']
 
 for af,bf,qfname,nfname in zip(afv,bfv,qfnamev,nfnamev):
     alpha = af*np.ones(K)
