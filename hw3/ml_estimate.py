@@ -1,5 +1,3 @@
-import gibbs
-import dataproc
 import numpy as np
 
 """
@@ -51,7 +49,7 @@ def calc_phi(q,c_vec,voc_idx,V):
     voc_idx - list of vocab indices
     V - the cardinality of the vocabulary
     """
-    S = len(voc_idx)
+    S = np.shape(q)[0]
     K = np.shape(q)[1] #number of topics
     phi_mat = np.zeros(K,V)
     c_sum = np.sum(c_vec)
