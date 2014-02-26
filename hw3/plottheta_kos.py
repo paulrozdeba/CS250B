@@ -12,11 +12,11 @@ from mpl_toolkits.mplot3d import Axes3D
 import ml_estimate as ml
 
 # import data
-ndata = np.loadtxt('data/c400_n_a10p0_b10p0_K3.dat')
-qdata = np.loadtxt('data/c400_q_a10p0_b10p0_K3.dat')
+ndata = np.loadtxt('data/kos_n_a1p0_b0p5_K3.dat')
+qdata = np.loadtxt('data/kos_q_a1p0_b0p5_K3.dat')
 
 # import doc,vocab indices
-doc_idx,voc_idx = scipy.io.loadmat('data/classic400.mat')['classic400'].nonzero()
+kosdata = np.loadtxt('data/docword.kos.txt', dtype='float', skiprows=3)
 
 K = 3
 alpha = 10.0*np.ones(K)

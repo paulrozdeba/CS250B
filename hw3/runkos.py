@@ -29,10 +29,6 @@ for d in range(M):
 
 M = int(kosdata[-1,0])  # reset number of documents
 
-# randomly select 25000 data points
-np.random.shuffle(kosdata)
-kosdata = kosdata[:25000]
-
 # split into counts and indices
 doc_idx = kosdata[:,0]
 voc_idx = kosdata[:,1]
