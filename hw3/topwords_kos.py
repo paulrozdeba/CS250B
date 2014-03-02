@@ -11,19 +11,22 @@ import ml_estimate as ml
 
 # load the data
 # import data
-ndata_K2 = np.loadtxt('data/kos_n_a1p0_b1p0_K2.dat')
-qdata_K2 = np.loadtxt('data/kos_q_a1p0_b1p0_K2.dat')
-ndata_K3 = np.loadtxt('data/kos_n_a1p0_b1p0_K3.dat')
-qdata_K3 = np.loadtxt('data/kos_q_a1p0_b1p0_K3.dat')
-ndata_K10 = np.loadtxt('data/kos_n_a1p0_b1p0_K10.dat')
-qdata_K10 = np.loadtxt('data/kos_q_a1p0_b1p0_K10.dat')
-ndata_K19 = np.loadtxt('data/kos_n_a1p0_b1p0_K19.dat')
-qdata_K19 = np.loadtxt('data/kos_q_a1p0_b1p0_K19.dat')
+ndata_K2 = np.loadtxt('data/kos_n_a1p0_b0p5_K2.dat')
+qdata_K2 = np.loadtxt('data/kos_q_a1p0_b0p5_K2.dat')
+ndata_K3 = np.loadtxt('data/kos_n_a1p0_b0p5_K3.dat')
+qdata_K3 = np.loadtxt('data/kos_q_a1p0_b0p5_K3.dat')
+ndata_K10 = np.loadtxt('data/kos_n_a1p0_b0p5_K10.dat')
+qdata_K10 = np.loadtxt('data/kos_q_a1p0_b0p5_K10.dat')
+ndata_K19 = np.loadtxt('data/kos_n_a1p0_b0p5_K19.dat')
+qdata_K19 = np.loadtxt('data/kos_q_a1p0_b0p5_K19.dat')
 
 # import the doc,vocab indices
 kosdata = np.loadtxt('data/kosdata.dat')
 doc_idx = kosdata[:,0]
 voc_idx = kosdata[:,1]
+f = open('data/vocab.kos.txt', 'r')
+vocabulary = f.readlines()
+f.close()
 
 V = 6906
 
@@ -33,11 +36,40 @@ phiK3 = ml.calc_phi(qdata_K3,beta,voc_idx,V)
 phiK10 = ml.calc_phi(qdata_K10,beta,voc_idx,V)
 phiK19 = ml.calc_phi(qdata_K19,beta,voc_idx,V)
 
-# get the top 10 words
-topK2 = np.sort(phiK2,axis=1)[:,-10:][:,::-1]
-topK3 = np.sort(phiK3,axis=1)[:,-10:][:,::-1]
-topK10 = np.sort(phiK10,axis=1)[:,-10:][:,::-1]
-topK19 = np.sort(phiK19,axis=1)[:,-10:][:,::-1]
+# get the top 20 words and their probabilities
+topK2 = np.sort(phiK2,axis=1)[:,-20:][:,::-1]
+topK2_ind = np.argsort(phiK2,axis=1)[:,-20:][:,::-1]
+topK3 = np.sort(phiK3,axis=1)[:,-20:][:,::-1]
+topK3_ind = np.argsort(phiK3,axis=1)[:,-20:][:,::-1]
+topK10 = np.sort(phiK10,axis=1)[:,-20:][:,::-1]
+topK10_ind = np.argsort(phiK10,axis=1)[:,-20:][:,::-1]
+topK19 = np.sort(phiK19,axis=1)[:,-20:][:,::-1]
+topK19_ind = np.argsort(phiK19,axis=1)[:,-20:][:,::-1]
+
+# now print the top words and their probabilities to file
+f = open('data/topwords_kos_a1p0_b0p5.txt', 'w')
+f.write('K = 2:\n')
+for i,plist in enumerate(topK2):
+    f.write('\nTopic:\n')
+    for j,p in enumerate(plist):
+        f.write(vocabulary[topK2_ind[i,j]])
+f.write('\nK = 3:\n')
+for i,plist in enumerate(topK3):
+    f.write('\nTopic:\n')
+    for j,p in enumerate(plist):
+        f.write(vocabulary[topK3_ind[i,j]])
+f.write('\nK = 10:\n')
+for i,plist in enumerate(topK10):
+    f.write('\nTopic:\t')
+    for j,p in enumerate(plist):
+        f.write(vocabulary[topK10_ind[i,j]])
+f.write('\nK = 19:\n')
+for i,plist in enumerate(topK19):
+    f.write('\nTopic:\n')
+    for j,p in enumerate(plist):
+        f.write(vocabulary[topK19_ind[i,j]])
+f.close()
+exit(0)
 
 # find max probabilities
 phimaxK2 = topK2[:,0]
