@@ -1,0 +1,364 @@
+K = 2:
+Topic:	aug
+bush
+general
+kerry
+house
+race
+democratic
+elections
+media
+john
+people
+campaign
+time
+password
+news
+president
+polls
+voters
+election
+november
+Topic:	bush
+aug
+poll
+people
+kerry
+general
+democratic
+house
+democrats
+republicans
+media
+election
+war
+senate
+tulsa
+campaign
+john
+whats
+elections
+president
+K = 3:
+Topic:	aug
+bush
+kerry
+general
+people
+war
+elections
+house
+candidates
+democratic
+Topic:	aug
+bush
+kerry
+general
+allies
+media
+president
+gop
+stolen
+election
+Topic:	aug
+general
+bush
+kerry
+democratic
+media
+expect
+economy
+polls
+iraq
+K = 10:
+Topic:	aug
+bush
+house
+kerry
+general
+election
+candidate
+republicans
+president
+state
+Topic:	general
+kerry
+aug
+war
+democratic
+news
+bush
+vote
+challenge
+murder
+Topic:	general
+aug
+bush
+kerry
+media
+reports
+scoop
+republican
+elections
+leading
+Topic:	aug
+general
+cleland
+calculator
+bush
+republican
+time
+thatll
+employers
+speaker
+Topic:	aug
+november
+race
+kerry
+democratic
+bush
+convention
+number
+voting
+people
+Topic:	aug
+pretty
+elections
+poll
+tougher
+august
+kerry
+america
+create
+district
+Topic:	bush
+aug
+kerry
+administration
+suddenly
+american
+showing
+pollster
+senator
+general
+Topic:	desperation
+elections
+appears
+bush
+aug
+times
+spread
+group
+saturday
+narrowly
+Topic:	features
+approval
+initiatives
+assessment
+involved
+union
+kerry
+garner
+delicious
+report
+Topic:	suppression
+bushs
+stay
+plan
+strange
+nbc
+baseball
+created
+aug
+dryfly
+K = 19:
+Topic:	aug
+bush
+house
+related
+campaign
+time
+president
+republicans
+kerry
+households
+Topic:	aug
+bush
+news
+general
+senate
+steal
+found
+waiting
+people
+results
+Topic:	governor
+aug
+section
+race
+shed
+general
+republican
+kerry
+john
+election
+Topic:	vote
+aug
+bush
+white
+kerry
+paid
+republican
+media
+voters
+lets
+Topic:	aug
+john
+house
+control
+media
+locations
+bush
+grab
+lead
+war
+Topic:	share
+republicans
+poll
+media
+protests
+bush
+opposition
+journalists
+prosecution
+ourcongressorg
+Topic:	election
+kerry
+general
+aug
+liberalrakkasan
+rolls
+wide
+end
+bush
+planned
+Topic:	primary
+aug
+retired
+friends
+campaign
+bush
+command
+convention
+kerry
+voters
+Topic:	aug
+media
+demand
+slot
+general
+results
+newt
+city
+republican
+president
+Topic:	general
+media
+kerry
+people
+bush
+poll
+times
+president
+aug
+team
+Topic:	reelection
+democratic
+war
+president
+general
+end
+aug
+bush
+nader
+kerry
+Topic:	john
+author
+general
+aug
+million
+republican
+house
+monday
+plain
+democratic
+Topic:	aug
+november
+reporting
+response
+ilsen
+kerry
+function
+surges
+finally
+bush
+Topic:	reputation
+links
+man
+republican
+voters
+bush
+endorsement
+general
+director
+war
+Topic:	country
+implied
+fight
+media
+aug
+john
+race
+registered
+choice
+rush
+Topic:	atlanta
+straight
+level
+human
+destroy
+aug
+cities
+operation
+jerry
+republicans
+Topic:	voting
+written
+google
+citizen
+shift
+reelection
+male
+strongholds
+general
+sunday
+Topic:	put
+general
+chances
+bush
+sign
+deal
+choice
+house
+ohio
+feel
+Topic:	coverage
+acting
+roughly
+relationship
+michigan
+poll
+bug
+shown
+announced
+records
