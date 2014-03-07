@@ -1,3 +1,5 @@
+import gibbs
+import dataproc
 import numpy as np
 
 """
@@ -31,8 +33,8 @@ def calc_theta(n,c_vec):
         
     #normalize
     for m in range(M):
-        theta_mat[m,:] += c_vec
-        theta_mat[m,:] /= T_vec[m] + c_sum
+        theta_mat[m] += c_vec
+        theta_mat[m] /= T_vec[m] + c_sum
     return theta_mat
 
 def calc_phi(q,c_vec,voc_idx,V):
@@ -51,7 +53,7 @@ def calc_phi(q,c_vec,voc_idx,V):
     """
     S = np.shape(q)[0]
     K = np.shape(q)[1] #number of topics
-    phi_mat = np.zeros(K,V)
+    phi_mat = np.zeros((K,V))
     c_sum = np.sum(c_vec)
     
     #fill out the phi-matrix
@@ -59,13 +61,13 @@ def calc_phi(q,c_vec,voc_idx,V):
         v = voc_idx[s]
         for k in range(K):
             phi_mat[k,v] += q[s,k]
-    
+
     topic_totals = np.sum(phi_mat,axis=1)
     
     #normalize
     for k in range(K):
-        phi_mat[k,:] += c_vec
-        phi_mat[k,:] /= topic_totals[k] + c_sum
+        phi_mat[k] += c_vec
+        phi_mat[k] /= (topic_totals[k] + c_sum)
         
     return phi_mat
     

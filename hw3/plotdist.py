@@ -12,8 +12,8 @@ import ml_estimate as ml
 
 
 # import data
-ndata = np.loadtxt('data/classic/c400_n_a1p0_b1000p0_K3.dat')
-qdata = np.loadtxt('data//classic/c400_q_a1p0_b1000p0_K3.dat')
+ndata = np.loadtxt('data/classic/c400_n_a0p1_b10000p0_K3.dat')
+qdata = np.loadtxt('data//classic/c400_q_a0p1_b10000p0_K3.dat')
 #color code the true labels
 truelabels = np.loadtxt('data/classic400_truelabels.dat')
 truelabelcolors = []
@@ -25,7 +25,7 @@ for i in range(400):
     else:
         truelabelcolors.append('g')
 K = 3
-alpha = 1.0*np.ones(K)
+alpha = 0.1*np.ones(K)
 theta = ml.calc_theta(ndata,alpha)
 
 # now plot distribution
@@ -50,6 +50,6 @@ ax.set_xlabel(r'$\theta_1$')
 ax.set_ylabel(r'$\theta_2$')
 ax.set_zlabel(r'$\theta_3$')
 ax.view_init(23,82)
-plt.title(r'$\alpha = 1.0,\beta = 1000.0$')
+plt.title(r'$\alpha = 0.1,\beta = 10000.0$')
 
 plt.show()
