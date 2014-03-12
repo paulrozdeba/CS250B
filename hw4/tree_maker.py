@@ -145,6 +145,7 @@ def recon_error(c1,c2,W1,W2,b1,b2,n1,n2,normalized):
     """
     d = np.size(c1)
     p = make_p(c1,c2,W1,b1,normalized)
+    #print p,W2,b2
     g = np.dot(W2,p) + b2
     
     rec_error = (float(n1)/float(n1+n2))*(np.linalg.norm(c1 - g[:d])**2)
@@ -158,3 +159,28 @@ def pred_error(prediction,t_label):
     pred_error = 0.0
     pred_error = -np.dot(t_label,np.log(prediction))
     return pred_error
+
+def whole_error(neg_list,pos_list,vocab,W1,b1,W2,b2,Wlabel,normalized):
+    """
+    calculates the prediction and reconstruction error over the whole corpus
+    """
+    whole_rec = 0.0
+    whole_pred = 0.0
+    
+    num_neg = len(neg_list)
+    num_pos = len(pos_list)
+    
+    #calculate over the neg_list
+    t_label = np.array([0.0,1.0])
+    for i in range(num_neg):
+        (ignore1,ignore2,ignore3,ignore4,rec_error,pred_error) = build_tree(neg_list[i],t_label,vocab,W1,W2,b1,b2,Wlabel,normalized)
+        whole_rec += rec_error
+        whole_pred += pred_error
+    #calculate over the pos_list
+    t_label = np.array([1.0,0.0])
+    for i in range(num_pos):
+        (ignore1,ignore2,ignore3,ignore4,rec_error,pred_error) = build_tree(pos_list[i],t_label,vocab,W1,W2,b1,b2,Wlabel,normalized)
+        whole_rec += rec_error
+        whole_pred += pred_error
+    
+    return whole_rec,whole_pred
