@@ -19,7 +19,7 @@ def compute_grad(flattened_array,d,label_size,lam_reg,alpha,neg_list,pos_list,vo
     Oh G-d this shit is getting complicated
     """
     (W1,b1,W2,b2,Wlabel) = fold_up(d,label_size,flattened_array)
-    (W1_grad,b1_grad,W2_grad,b2_grad,Wlabel_grad) = bp.full_grad(W1,b1,W2,b2,Wlabel,lam_reg,alpha,neg_list,post_list,vocab,normalized)
+    (W1_grad,b1_grad,W2_grad,b2_grad,Wlabel_grad) = bp.full_grad(W1,b1,W2,b2,Wlabel,lam_reg,alpha,neg_list,pos_list,vocab,normalized)
     flattened_grad = unfold(W1_grad,b1_grad,W2_grad,b2_grad,Wlabel_grad)
     return flattened_grad
     
