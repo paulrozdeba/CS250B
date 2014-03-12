@@ -1,4 +1,5 @@
 *.pyc
 *.dat
+*.dat.backup
 *_COPY*.py
 plots
