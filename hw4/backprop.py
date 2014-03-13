@@ -8,7 +8,59 @@ propagation algorithm.
 import numpy as np
 import time
 
-def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
+def h_norenorm(x,W):
+    return np.tanh(np.einsum('ij,j',W,x))
+
+def h_renorm(x,W):
+    tanhact = np.tan(np.einsum('ij,j',W,x))
+    return tanhact / np.sqrt(np.einsum('i,i',tanhact,tanhact))
+
+def g(x,V):
+    expact = np.exp(np.einsum('ij,j',V,x))
+    return expact / np.sum(expact)
+
+def Dh_norenorm(x,W):
+    return 1.0 - h_norenorm(x,W)**2.0
+
+def Dh_renorm(x,W):
+    tanhact = np.tanh(np.einsum('ij,j',W,x))
+    tanhact_norm2 = np.einsum('i,i',tanhact,tanhact)
+    dtanhact = 1.0 - h_renorm(x,W)
+    return (1.0/np.sqrt(tanhact_norm2)) * dtanhact * \
+        (1.0 - (h_renorm(x,W)/tanhact_norm2))
+
+def Dg(x,V):
+    gval = g(x,V)
+    return gval * (1.0 - gval)
+
+def backprop(tree, treeinfo, t, pars, alpha=0.2, renorm=False):
+    """
+    tree - Array of meanings for each node. Has shape=(d,num_nodes) as per
+           output of build_tree. It is transposed in this function so that
+           we can loop over nodes.
+    treeinfo - Parameters describing tree structure. Has shape=(4,num_nodes)
+               as per output of build_tree.  It is transposed in this function
+               so that we can loop over information about individual nodes.
+    t - True label.
+    pars - List of parameter arrays in the order W,U,V.
+    alpha - Hyperparameter for relative importance of E1, E2. Defaults to
+            Socher's value of 0.2.
+    renorm - Do you want to use renormalized transfer functions?
+    """
+    
+    if renorm == False:
+        DW,DU,DV = backprop_core(tree,treeinfo,t,h_norenorm,Dh_norenorm,g,Dg,
+                                 pars,alpha)
+    elif renorm == True:
+        DW,DU,DV = backprop_core(tree,treeinfo,t,h_renorm,Dh_renorm,g,Dg,
+                                 pars,alpha)
+    else:
+        print('Invalid input. Flag renorm must be either True or False.')
+        exit(0)
+    
+    return DW,DU,DV
+
+def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
     """
     tree - Array of meanings for each node. Has shape=(d,num_nodes) as per
            output of build_tree. It is transposed in this function so that

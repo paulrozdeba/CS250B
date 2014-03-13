@@ -61,7 +61,7 @@ def runtest():
     pars = [W,U,V]
     
     # run the bastard
-    DW,DU,DV = backprop(tree,treeinfo,t,h,Dh,g,Dg,pars)
+    DW,DU,DV = backprop(tree,treeinfo,t,pars,renorm=True)
 
 if __name__ == '__main__':
     runtest()
