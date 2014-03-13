@@ -20,16 +20,38 @@ def Dg(x,V):
 
 def runtest():
     # invent dummy tree and stuff
-    DM = 20
+    DM = 2
     DL = 2
-    Nw = 2
+    Nw = 4
     Nn = 2*Nw - 1
-    
-    # start with a two-word tree
+    """
+    # two-word tree
     tree = np.random.randn(Nn,DM).T
-    treeinfo = np.array([[1, 2, Nn, 2],
-                         [Nn, Nn, 0, 1],
-                         [Nn, Nn, 0, 1]]).T
+    treeinfo = np.array([[Nn, Nn, 2, 1],
+                         [Nn, Nn, 2, 1],
+                         [0, 1, Nn, 2]]).T
+    #treeinfo = np.array([[1, 2, Nn, 2],
+    #                     [Nn, Nn, 0, 1],
+    #                     [Nn, Nn, 0, 1]]).T
+    """
+    """
+    # three-word tree
+    tree = np.random.randn(Nn,DM).T
+    treeinfo = np.array([[Nn, Nn, 3, 1],
+                         [Nn, Nn, 3, 1],
+                         [Nn, Nn, 4, 1],
+                         [0, 1, 4, 2],
+                         [3, 2, Nn, 3]]).T
+    """
+    # four-word tree
+    tree = np.random.randn(Nn,DM).T
+    treeinfo = np.array([[Nn,Nn,4,1],
+                         [Nn,Nn,4,1],
+                         [Nn,Nn,5,1],
+                         [Nn,Nn,6,1],
+                         [0,1,5,2],
+                         [4,2,6,3],
+                         [5,3,Nn,4]]).T
     t = np.random.randn(DL)
 
     # initialize parameters
@@ -39,7 +61,7 @@ def runtest():
     pars = [W,U,V]
     
     # run the bastard
-    backprop(tree,treeinfo,t,h,Dh,g,Dg,pars)
+    DW,DU,DV = backprop(tree,treeinfo,t,h,Dh,g,Dg,pars)
 
 if __name__ == '__main__':
     runtest()

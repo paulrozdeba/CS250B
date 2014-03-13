@@ -50,11 +50,10 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
             continue  # is a leaf
         
         # this next array rescales the reconstruction error
-        NRec = np.eye(shape=(2*NDM,2*NDM))
+        NRec = np.eye(2*NDM,2*NDM)
         NRec[:NDM,:NDM] *= treeinfo[info[0]][3]  # n leaves under left child
         NRec[NDM:,NDM:] *= treeinfo[info[1]][3]  # n leaves under right child
-
-        t0 = time.time()
+        
         meaning = tree[i]
         lchild = tree[info[0]]
         rchild = tree[info[1]]
@@ -67,7 +66,7 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         # calculate deltas for W,U,V
         deltaW1 = np.einsum('ik,k,ij',NRec,(z-childvec),U) * Dh(childvec,W)
         deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning,V),V) * Dh(childvec,W)
-        deltaU = z - childvec
+        deltaU = np.einsum('ij,j',NRec,(z-childvec))
         deltaV = -(t/p) * Dg(meaning,V)
         
         # add to derivatives over parameters
@@ -93,16 +92,15 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         
         # now propagate down through the children
         # children are ordered from left to right
-        c1idx = info[0]
-        c2idx = info[1]
-        children_idx = [[c1idx,c2idx]]
-        pdeltas = [[deltaW1,deltaW2]]
-
+        children_idx = [info[0],info[1]]
+        pdeltas = [[deltaW1,deltaW2],[deltaW1,deltaW2]]  # parents' deltas
+        
         leafcounter = 0  # count leaves, for termination of loop
         
         while True:
-            # first, test to see if we've looked at all possible children
-            if leafcounter = info[3]:
+            # First, test to see if we've looked at all possible (hidden)
+            # children.  If so, break and move on to the next parent.
+            if leafcounter == info[3]:
                 break
             
             # Store deltas of all children. At the end of a loop iteration,
@@ -111,49 +109,49 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
             newchildren_idx = []  # store indices of new children
             
             for pctr,cidx in enumerate(children_idx):
-                # is it a leaf? if so, GTFO.
-                if treeinfo[cidx[0]][0]==(2*N-1):
+                # have we hit a leaf?
+                if treeinfo[cidx,0]==(2*N-1):
                     leafcounter += 1
-                if treeinfo[cidx[1]][0]==(2*N-1):
-                    leafcounter += 1
-                if treeinfo[cidx[0]][0]==(2*N-1) and treeinfo[cidx[1]][0]==(2*N-1):
-                    break  # you've hit two leaves
+                    continue
+                # OK, now is it a left or right child?
+                if cidx == treeinfo[treeinfo[cidx,2],0]:
+                    isleft = True
+                if cidx == treeinfo[treeinfo[cidx,2],1]:
+                    isright = True
                 
                 # parent deltas
                 deltaW1 = pdeltas[pctr][0]
                 deltaW2 = pdeltas[pctr][1]
                 
-                # the childrens' children (children^2, hence the notation)
-                llchild2_idx = treeinfo[cidx[0]][0]
-                lrchild2_idx = treeinfo[cidx[0]][1]
-                rlchild2_idx = treeinfo[cidx[1]][0]
-                rrchild2_idx = treeinfo[cidx[1]][1]
-                llchild2 = tree[llchild2_idx]
-                lrchild2 = tree[lrchild2_idx]
-                rlchild2 = tree[rlchild2_idx]
-                rrchild2 = tree[rrchild2_idx]
-                
-                child2vec = np.append(llchild2,lrchild2)
-                np.append(child2vec,np.append([rlchild2,rrchild2]))
+                # the child's children (children^2, hence the notation)
+                lchild2_idx = treeinfo[cidx,0]
+                rchild2_idx = treeinfo[cidx,1]
+                lchild2 = tree[lchild2_idx]
+                rchild2 = tree[rchild2_idx]
+                child2vec = np.append(lchild2,rchild2)
                 
                 # keep track of new childrens' indices
-                newchildren_idx.append([llchild2_idx,lrchild2_idx])
-                newchildren_idx.append([rlchild2_idx,rrchild2_idx])
-
-                # calculate the deltas
-                ldeltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wleft)
-                ldeltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wleft)
-                rdeltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wright)
-                rdeltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wright)
-                                
-                cdeltas.append([[ldeltaW1,ldeltaW2],[rdeltaW1,rdeltaW2]])
+                newchildren_idx.append(lchild2_idx)
+                newchildren_idx.append(rchild2_idx)
                 
-                # now calculate contribution to derivatives
-                DW1 = alpha * np.outer(ldeltaW1,child2vec[0])
-                DW2 = (1.0 - alpha) * np.outer(ldeltaW2,child2vec[0])
+                # calculate the deltas
+                if isleft == True:
+                    c_deltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wleft)
+                    c_deltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wleft)
+                elif isright == True:
+                    c_deltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wright)
+                    c_deltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wright)
+                cdeltas.append([c_deltaW1,c_deltaW2])
+                cdeltas.append([c_deltaW1,c_deltaW2])
+                
+                # Now calculate contribution to derivatives
+                DW1 = alpha * np.outer(c_deltaW1,child2vec)
+                DW2 = (1.0 - alpha) * np.outer(c_deltaW2,child2vec)
                 DW += DW1 + DW2
             
-            pdeltas = cdeltas  # time makes you bolder, children get older
+            # If you've reached this point, you've look at all the children of
+            # the previous parent.
+            pdeltas = cdeltas
             children_idx = newchildren_idx
-        
-        return DW,DU,DV
+    
+    return DW,DU,DV
