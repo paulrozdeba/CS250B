@@ -50,7 +50,7 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
             continue  # is a leaf
         
         # this next array rescales the reconstruction error
-        NRec = np.eye(shape=(2*NDM,2*NDM))
+        NRec = np.eye(2*NDM,2*NDM)
         NRec[:NDM,:NDM] *= treeinfo[info[0]][3]  # n leaves under left child
         NRec[NDM:,NDM:] *= treeinfo[info[1]][3]  # n leaves under right child
 
@@ -102,7 +102,7 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         
         while True:
             # first, test to see if we've looked at all possible children
-            if leafcounter = info[3]:
+            if leafcounter == info[3]:
                 break
             
             # Store deltas of all children. At the end of a loop iteration,
