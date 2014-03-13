@@ -98,7 +98,6 @@ def backprop(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         leafcounter = 0  # count leaves, for termination of loop
         
         while True:
-<<<<<<< HEAD
             # First, test to see if we've looked at all possible (hidden)
             # children.  If so, break and move on to the next parent.
             if leafcounter == info[3]:
