@@ -4,7 +4,7 @@ backprop_tests.py
 Just some tests for the backprop function.
 """
 import numpy as np
-from backprop import backprop
+from backprop import backprop,backprop_full
 
 def h(x,W):
     return np.tanh(np.einsum('ij,j',W,x))
@@ -48,10 +48,10 @@ def runtest():
     treeinfo = np.array([[Nn,Nn,4,1],
                          [Nn,Nn,4,1],
                          [Nn,Nn,5,1],
-                         [Nn,Nn,6,1],
-                         [0,1,5,2],
-                         [4,2,6,3],
-                         [5,3,Nn,4]]).T
+                         [Nn,Nn,5,1],
+                         [0,1,6,2],
+                         [2,3,6,2],
+                         [4,5,Nn,4]]).T
     t = np.random.randn(DL)
 
     # initialize parameters
@@ -61,7 +61,7 @@ def runtest():
     pars = [W,U,V]
     
     # run the bastard
-    DW,DU,DV = backprop(tree,treeinfo,t,pars,renorm=True)
+    DW,DU,DV,Dx = backprop_full(tree,treeinfo,t,pars,renorm=True)
 
 if __name__ == '__main__':
     runtest()
