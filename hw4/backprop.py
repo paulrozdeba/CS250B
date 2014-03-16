@@ -143,21 +143,21 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         childvec = np.append(lchild,rchild)
         
         # calculate labels and reconstructions
-        p = g(meaning,V)  # predicted label
+        p = g(meaning[:,:-1],V)  # predicted label
         z = np.einsum('ij,j',U,meaning)  # reconstruction
         
         # calculate deltas for W,U,V
         deltaW1 = np.einsum('ik,k,ij',NRec,(z-childvec),U) * Dh(childvec,W)
-        deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning,V),V) * Dh(childvec,W)
+        deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning[:,:-1],V),V) * Dh(childvec,W)
         deltaU = np.einsum('ij,j',NRec,(z-childvec))
-        deltaV = -(t/p) * Dg(meaning,V)
+        deltaV = -(t/p) * Dg(meaning[:,:-1],V)
         
         # add to derivatives over parameters
         DW1 = alpha * np.outer(deltaW1,childvec)
         DW2 = (1.0 - alpha) * np.outer(deltaW2,childvec)
         DW += DW1 + DW2
         DU += alpha * np.outer(deltaU,meaning)
-        DV += (1.0-alpha) * np.outer(deltaV,meaning)
+        DV += (1.0-alpha) * np.outer(deltaV,meaning[:,:-1])
         
         # Previously, I believed the step below to be necessary. However, I
         # think the deltaW's calculated above are ALREADY for the hidden node.
