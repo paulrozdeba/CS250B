@@ -55,13 +55,14 @@ def runtest():
     t = np.random.randn(DL)
 
     # initialize parameters
-    W = np.random.randn(DM,2*DM)
-    U = np.random.randn(2*DM,DM)
+    W = np.random.randn(DM,2*DM+1)
+    U = np.random.randn(2*DM,DM+1)
     V = np.random.randn(DL,DM)
     pars = [W,U,V]
     
     # run the bastard
     DW,DU,DV,Dx = backprop_full(tree,treeinfo,t,pars,renorm=True)
+    print DW,DU,DV,Dx
 
 if __name__ == '__main__':
     runtest()

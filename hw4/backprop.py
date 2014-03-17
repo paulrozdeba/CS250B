@@ -26,7 +26,7 @@ def Dh_renorm(x,W):
     tanhact = np.tanh(np.einsum('ij,j',W,x))
     tanhact_norm2 = np.einsum('i,i',tanhact,tanhact)
     dtanhact = 1.0 - h_renorm(x,W)
-    return (1.0/np.sqrt(tanhact_norm2)) * dtanhact * \
+    return (1.0/np.sqrt(tanhact_norm2)) * dtanhact * h_renorm(x,W) * \
         (1.0 - (h_renorm(x,W)/tanhact_norm2))
 
 def Dg(x,V):
@@ -117,7 +117,7 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
     NDM = tree.shape[1]  # number of meaning dimensions
     NDL = V.shape[0]  # number of label dimensions
     Wleft = W[:,:NDM]
-    Wright = W[:,NDM:]
+    Wright = W[:,NDM:]  # this will include the extra column at the end
     
     # need arrays for derivatives wrt parameters
     DW = np.zeros(shape=W.shape)
@@ -134,30 +134,39 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         
         # this next array rescales the reconstruction error
         NRec = np.eye(2*NDM,2*NDM)
-        NRec[:NDM,:NDM] *= treeinfo[info[0]][3]  # n leaves under left child
-        NRec[NDM:,NDM:] *= treeinfo[info[1]][3]  # n leaves under right child
+        nleft = float(treeinfo[info[0]][3])
+        nright = float(treeinfo[info[1]][3])
+        nrnl = float(nright + nleft)
+        NRec[:NDM,:NDM] *= np.sqrt(nleft/nrnl)  # N scaling for left child
+        NRec[NDM:,NDM:] *= np.sqrt(nright/nrnl)  # N scaling for right child
         
         meaning = tree[i]
         lchild = tree[info[0]]
         rchild = tree[info[1]]
         childvec = np.append(lchild,rchild)
         
+        # extended vectors
+        meaningX = np.append(meaning,1)
+        childvecX = np.append(childvec,1)
+        
         # calculate labels and reconstructions
-        p = g(meaning[:,:-1],V)  # predicted label
-        z = np.einsum('ij,j',U,meaning)  # reconstruction
+        p = g(meaning,V)  # predicted label
+        z = np.einsum('ij,j',U,meaningX)  # reconstruction
         
         # calculate deltas for W,U,V
-        deltaW1 = np.einsum('ik,k,ij',NRec,(z-childvec),U) * Dh(childvec,W)
-        deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning[:,:-1],V),V) * Dh(childvec,W)
+        Ured = U[:,:-1]
+        Wred = W[:,:-1]
+        deltaW1 = np.einsum('ik,k,ij',NRec,(z-childvec),Ured) * Dh(childvecX,W)
+        deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning,V),V) * Dh(childvecX,W)
         deltaU = np.einsum('ij,j',NRec,(z-childvec))
-        deltaV = -(t/p) * Dg(meaning[:,:-1],V)
+        deltaV = -(t/p) * Dg(meaning,V)
         
         # add to derivatives over parameters
-        DW1 = alpha * np.outer(deltaW1,childvec)
-        DW2 = (1.0 - alpha) * np.outer(deltaW2,childvec)
+        DW1 = alpha * np.outer(deltaW1,childvecX)
+        DW2 = (1.0 - alpha) * np.outer(deltaW2,childvecX)
         DW += DW1 + DW2
-        DU += alpha * np.outer(deltaU,meaning)
-        DV += (1.0-alpha) * np.outer(deltaV,meaning[:,:-1])
+        DU += alpha * np.outer(deltaU,meaningX)
+        DV += (1.0-alpha) * np.outer(deltaV,meaning)
         
         # Previously, I believed the step below to be necessary. However, I
         # think the deltaW's calculated above are ALREADY for the hidden node.
@@ -212,6 +221,7 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                 lchild2 = tree[lchild2_idx]
                 rchild2 = tree[rchild2_idx]
                 child2vec = np.append(lchild2,rchild2)
+                child2vecX = np.append(child2vec,1)
                 
                 # keep track of new childrens' indices
                 newchildren_idx.append(lchild2_idx)
@@ -219,22 +229,21 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                 
                 # calculate the deltas
                 if isleft == True:
-                    c_deltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wleft)
-                    c_deltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wleft)
+                    c_deltaW1 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW1,Wleft)
+                    c_deltaW2 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW2,Wleft)
                 elif isright == True:
-                    c_deltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wright)
-                    c_deltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wright)
+                    c_deltaW1 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW1,Wright)
+                    c_deltaW2 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW2,Wright)
                 cdeltas.append([c_deltaW1,c_deltaW2])
                 cdeltas.append([c_deltaW1,c_deltaW2])
                 
                 # Now calculate contribution to derivatives
-                DW1 = alpha * np.outer(c_deltaW1,child2vec)
-                DW2 = (1.0 - alpha) * np.outer(c_deltaW2,child2vec)
+                DW1 = alpha * np.outer(c_deltaW1,child2vecX)
+                DW2 = (1.0 - alpha) * np.outer(c_deltaW2,child2vecX)
                 DW += DW1 + DW2
             
             # If you've reached this point, you've look at all the children of
             # the previous parent.
-            print newchildren_idx
             pdeltas = cdeltas
             children_idx = newchildren_idx
     
@@ -286,21 +295,30 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         
         # this next array rescales the reconstruction error
         NRec = np.eye(2*NDM,2*NDM)
-        NRec[:NDM,:NDM] *= treeinfo[info[0]][3]  # n leaves under left child
-        NRec[NDM:,NDM:] *= treeinfo[info[1]][3]  # n leaves under right child
+        nleft = float(treeinfo[info[0]][3])
+        nright = float(treeinfo[info[1]][3])
+        nrnl = float(nright + nleft)
+        NRec[:NDM,:NDM] *= np.sqrt(nleft/nrnl)  # N scaling for left child
+        NRec[NDM:,NDM:] *= np.sqrt(nright/nrnl)  # N scaling for right child
         
         meaning = tree[i]
         lchild = tree[info[0]]
         rchild = tree[info[1]]
         childvec = np.append(lchild,rchild)
         
+        # extended vectors
+        meaningX = np.append(meaning,1)
+        childvecX = np.append(childvec,1)
+        
         # calculate labels and reconstructions
         p = g(meaning,V)  # predicted label
-        z = np.einsum('ij,j',U,meaning)  # reconstruction
+        z = np.einsum('ij,j',U,meaningX)  # reconstruction
         
         # calculate deltas for W,U,V
-        deltaW1 = np.einsum('ik,k,ij',NRec,(z-childvec),U) * Dh(childvec,W)
-        deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning,V),V) * Dh(childvec,W)
+        Ured = U[:,:-1]
+        Wred = W[:,:-1]
+        deltaW1 = np.einsum('ik,k,ij',NRec,(z-childvec),Ured) * Dh(childvecX,W)
+        deltaW2 = -np.einsum('i,i,ij',(t/p),Dg(meaning,V),V) * Dh(childvecX,W)
         deltaU = np.einsum('ij,j',NRec,(z-childvec))
         deltaV = -(t/p) * Dg(meaning,V)
         
@@ -309,17 +327,17 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
         # under consideration
         # these vectors aren't used until the later loop, when we propagate
         # down to the leaves
-        deltax1 = np.einsum('ij,j',NRec,z - childvec)
+        deltax1 = np.einsum('ij,j',NRec,(z-childvec))
         deltax2 = -(t/p) * Dg(meaning,V)
         # propagate to the hidden node
-        deltax1 = np.einsum('i,ij',deltax1,U)
+        deltax1 = np.einsum('i,ij',deltax1,Ured)
         deltax2 = np.einsum('i,ij',deltax2,V)
         
         # add to derivatives over parameters
-        DW1 = alpha * np.outer(deltaW1,childvec)
-        DW2 = (1.0 - alpha) * np.outer(deltaW2,childvec)
+        DW1 = alpha * np.outer(deltaW1,childvecX)
+        DW2 = (1.0 - alpha) * np.outer(deltaW2,childvecX)
         DW += DW1 + DW2
-        DU += alpha * np.outer(deltaU,meaning)
+        DU += alpha * np.outer(deltaU,meaningX)
         DV += (1.0-alpha) * np.outer(deltaV,meaning)
         
         # Previously, I believed the step below to be necessary. However, I
@@ -384,6 +402,7 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                 lchild2 = tree[lchild2_idx]
                 rchild2 = tree[rchild2_idx]
                 child2vec = np.append(lchild2,rchild2)
+                child2vecX = np.append(child2vec,1)
                 
                 # keep track of new childrens' indices
                 newchildren_idx.append(lchild2_idx)
@@ -391,21 +410,21 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                 
                 # calculate the deltas
                 if isleft == True:
-                    c_deltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wleft)
-                    c_deltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wleft)
-                    c_deltax1 = Dh(child2vec,W) * np.einsum('i,ij',deltax1,Wleft)
-                    c_deltax2 = Dh(child2vec,W) * np.einsum('i,ij',deltax2,Wleft)
+                    c_deltaW1 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW1,Wleft)
+                    c_deltaW2 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW2,Wleft)
+                    c_deltax1 = Dh(child2vecX,W) * np.einsum('i,ij',deltax1,Wleft)
+                    c_deltax2 = Dh(child2vecX,W) * np.einsum('i,ij',deltax2,Wleft)
                 elif isright == True:
-                    c_deltaW1 = Dh(child2vec,W) * np.einsum('i,ij',deltaW1,Wright)
-                    c_deltaW2 = Dh(child2vec,W) * np.einsum('i,ij',deltaW2,Wright)
-                    c_deltax1 = Dh(child2vec,W) * np.einsum('i,ij',deltax1,Wright)
-                    c_deltax2 = Dh(child2vec,W) * np.einsum('i,ij',deltax2,Wright)
+                    c_deltaW1 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW1,Wright)
+                    c_deltaW2 = Dh(child2vecX,W) * np.einsum('i,ij',deltaW2,Wright)
+                    c_deltax1 = Dh(child2vecX,W) * np.einsum('i,ij',deltax1,Wright)
+                    c_deltax2 = Dh(child2vecX,W) * np.einsum('i,ij',deltax2,Wright)
                 cdeltas.append([c_deltaW1,c_deltaW2,deltax1,deltax2])
                 cdeltas.append([c_deltaW1,c_deltaW2,deltax1,deltax2])
                 
                 # Now calculate contribution to derivatives
-                DW1 = alpha * np.outer(c_deltaW1,child2vec)
-                DW2 = (1.0 - alpha) * np.outer(c_deltaW2,child2vec)
+                DW1 = alpha * np.outer(c_deltaW1,child2vecX)
+                DW2 = (1.0 - alpha) * np.outer(c_deltaW2,child2vecX)
                 DW += DW1 + DW2
                 if leftLeaf == True:
                     Dx1 = alpha * np.einsum('ij,j',Wleft,c_deltax1)
@@ -413,9 +432,9 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                           np.einsum('ij,j',Wleft,c_deltax2)
                     Dx[lchild2_idx] += Dx1 + Dx2
                 if rightLeaf == True:
-                    Dx1 = alpha * np.einsum('ij,j',Wright,c_deltax1)
+                    Dx1 = alpha * np.einsum('ij,j',Wright[:,:-1],c_deltax1)
                     Dx2 = (1.0-alpha) * \
-                          np.einsum('ij,j',Wright,c_deltax2)
+                          np.einsum('ij,j',Wright[:,:-1],c_deltax2)
                     Dx[rchild2_idx] += Dx1 + Dx2
             
             # If you've reached this point, you've look at all the children of
