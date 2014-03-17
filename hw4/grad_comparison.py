@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from backprop import backprop,backprop_full
 from training import full_j, compute_grad
 from dataproc import format_data
+from cross_validate import k_fold
 
 def main():
     D = 4
@@ -34,7 +35,7 @@ def main():
     Np = len(allflat)
     
     # hyperparameters
-    eps = 0.0001
+    eps = 0.00000001
     lambda_reg = 0.0
     alpha = 0.2
     
@@ -44,22 +45,30 @@ def main():
     pos_list = pos_list[:1]
     vocab = np.random.randn(268810,D)
     
+    # do k_fold
+    mean,SEM = k_fold(neg_list,pos_list,10,L,alpha,lambda_reg,vocab,normalized=False)
+    exit(0)
+    
     # calculate finite difference approximation to gradient
     numgrad = np.zeros(Np)
     for i in range(Np):
         print 'P ' + str(i)
         allflat[i] += eps
         fxpe = full_j(allflat,D,L,lambda_reg,alpha,neg_list,pos_list,
-                      vocab,normalized=True)
+                      vocab,normalized=False)
         allflat[i] -= 2.0*eps
         fxme = full_j(allflat,D,L,lambda_reg,alpha,neg_list,pos_list,
-                       vocab,normalized=True)
+                       vocab,normalized=False)
         allflat[i] += eps
         numgrad[i] = (fxpe - fxme)/(2.0*eps)
     
     # now use backprop
     bpgrad = compute_grad(allflat,D,L,lambda_reg,alpha,neg_list,pos_list,
-                          vocab,normalized=True)
+                          vocab,normalized=False)
+    
+    print numgrad
+    print bpgrad
+    print numgrad-bpgrad
 
 if __name__ == '__main__':
     main()
