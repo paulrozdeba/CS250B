@@ -170,7 +170,7 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
     NDM = tree.shape[1]  # number of meaning dimensions
     NDL = V.shape[0]  # number of label dimensions
     Wleft = W[:,:NDM]
-    Wright = W[:,NDM:]  # this will include the extra column at the end
+    Wright = W[:,NDM:-1]  # this will include the extra column at the end
     
     # need arrays for derivatives wrt parameters
     DW = np.zeros(shape=W.shape)
@@ -259,6 +259,8 @@ def backprop_core(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                     leafcounter += 1
                     continue
                 # OK, now is it a left or right child?
+                isleft = False
+                isright = False
                 if cidx == treeinfo[treeinfo[cidx,2],0]:
                     isleft = True
                 if cidx == treeinfo[treeinfo[cidx,2],1]:
@@ -333,7 +335,7 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
     NDM = tree.shape[1]  # number of meaning dimensions
     NDL = V.shape[0]  # number of label dimensions
     Wleft = W[:,:NDM]
-    Wright = W[:,NDM:]
+    Wright = W[:,NDM:-1]
     
     # need arrays for derivatives wrt parameters
     DW = np.zeros(shape=W.shape)
@@ -433,6 +435,8 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                     leafcounter += 1
                     continue
                 # OK, now is it a left or right child?
+                isleft = False
+                isright = False
                 if cidx == treeinfo[treeinfo[cidx,2],0]:
                     isleft = True
                 if cidx == treeinfo[treeinfo[cidx,2],1]:
