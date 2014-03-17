@@ -20,9 +20,9 @@ def Dg(x,V):
 
 def runtest():
     # invent dummy tree and stuff
-    DM = 2
+    DM = 5
     DL = 2
-    Nw = 4
+    Nw = 42
     Nn = 2*Nw - 1
     """
     # two-word tree
@@ -44,6 +44,7 @@ def runtest():
                          [3, 2, Nn, 3]]).T
     """
     # four-word tree
+    """
     tree = np.random.randn(Nn,DM).T
     treeinfo = np.array([[Nn,Nn,4,1],
                          [Nn,Nn,4,1],
@@ -52,6 +53,11 @@ def runtest():
                          [0,1,6,2],
                          [2,3,6,2],
                          [4,5,Nn,4]]).T
+    """
+    tree = np.load('meanings.npy')
+    treeinfo = np.load('structure.npy')
+    print tree.T
+    print treeinfo.T
     t = np.random.randn(DL)
 
     # initialize parameters

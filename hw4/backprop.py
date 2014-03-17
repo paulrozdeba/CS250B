@@ -500,6 +500,8 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                 if cidx == treeinfo[treeinfo[cidx,2],1]:
                     isright = True
                 # are the children leaves?
+                leftLeaf = False
+                rightLeaf = False
                 if treeinfo[treeinfo[cidx,0],0] == (2*N-1):
                     leftLeaf = True
                 if treeinfo[treeinfo[cidx,1],0] == (2*N-1):
@@ -547,9 +549,9 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                           np.einsum('ij,j',Wleft,c_deltax2)
                     Dx[lchild2_idx] += Dx1 + Dx2
                 if rightLeaf == True:
-                    Dx1 = alpha * np.einsum('ij,j',Wright[:,:-1],c_deltax1)
+                    Dx1 = alpha * np.einsum('ij,j',Wright,c_deltax1)
                     Dx2 = (1.0-alpha) * \
-                          np.einsum('ij,j',Wright[:,:-1],c_deltax2)
+                          np.einsum('ij,j',Wright,c_deltax2)
                     Dx[rchild2_idx] += Dx1 + Dx2
             
             # If you've reached this point, you've look at all the children of
