@@ -116,7 +116,8 @@ def full_grad_full(W1,b1,W2,b2,Wlabel,lam_reg,alpha,neg_list,pos_list,vocab,norm
     dW /= float(len(neg_list) + len(pos_list))
     dU /= float(len(neg_list) + len(pos_list))
     dV /= float(len(neg_list) + len(pos_list))
-    return dW[:,:(2*d)],dW[:,(2*d)],dU[:,:d],dU[:,d],dV
+    dVocab /= float(len(neg_list) + len(pos_list))
+    return dW[:,:(2*d)],dW[:,(2*d)],dU[:,:d],dU[:,d],dV,dVocab
 
 def h_norenorm(x,W):
     return np.tanh(np.einsum('ij,j',W,x))
