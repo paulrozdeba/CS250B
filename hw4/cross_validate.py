@@ -12,7 +12,7 @@ def compare_predict(W1,b1,W2,b2,Wlabel,pos_neg,example,vocab,normalized):
     
     data = tm.build_tree(example,label,vocab,W1,W2,b1,b2,Wlabel,normalized)
     predictions = data[3]
-    top_predict = predictions[-1]
+    top_predict = predictions[:,-1]
     
     accurate = np.dot(label,top_predict)
     if(accurate >= 0.5):

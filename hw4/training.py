@@ -7,11 +7,16 @@ def unfold(W1,b1,W2,b2,Wlabel):
     return np.hstack((W1.flatten(),b1.flatten(),W2.flatten(),b2.flatten(),Wlabel.flatten()))
 
 def fold_up(d,label_size,flattened_array):
-    W1 = flattened_array[:2*d*d].reshape((d,2*d))
-    b1 = flattened_array[2*d*d:(2*d*d)+d]
-    W2 = flattened_array[(2*d*d)+d:d+(4*d*d)].reshape((2*d,d))
-    b2 = flattened_array[d+(4*d*d):(3*d)+(4*d*d)]
-    Wlabel = flattened_array[(3*d)+(4*d*d):].reshape((label_size,d))
+    start = 0
+    W1 = flattened_array[start:start +(2*d*d)].reshape((d,2*d))
+    start = 2*d*d
+    b1 = flattened_array[start:start + d]
+    start += d
+    W2 = flattened_array[start:start + (2*d*d)].reshape((2*d,d))
+    start += (2*d*d)
+    b2 = flattened_array[start:start + (2*d)]
+    start += 2*d
+    Wlabel = flattened_array[start:start + (d*label_size)].reshape((label_size,d))
     return W1,b1,W2,b2,Wlabel
 
 def compute_grad(flattened_array,d,label_size,lam_reg,alpha,neg_list,pos_list,vocab,normalized):
@@ -38,10 +43,10 @@ def training_iterate(d,label_size,lam_reg,alpha,neg_train,pos_train,vocab,normal
     """
     My eyes are bleeding!
     """
-    parameter_size = (4*d*d) + (2*d) + (d*label_size)
+    parameter_size = (4*d*d) + (3*d) + (d*label_size)
     x0 = np.random.randn(parameter_size)
     myargs = (d,label_size,lam_reg,alpha,neg_train,pos_train,vocab,normalized)
-    result =  fmin_l_bfgs_b(full_j,x0,compute_grad,args=myargs)
+    result =  fmin_l_bfgs_b(full_j,x0,fprime=compute_grad,args=myargs)
     (W1,b1,W2,b2,Wlabel) = fold_up(d,label_size,result[0])
     return W1,b1,W2,b2,Wlabel,result[1]
     
