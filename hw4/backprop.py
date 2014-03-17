@@ -28,7 +28,7 @@ def full_grad(W1,b1,W2,b2,Wlabel,alpha,neg_list,pos_list,vocab,normalized):
     dV = np.zeros(np.shape(Wlabel))
     
     #loop over neg_list
-    label = np.array([0.0,11.0])
+    label = np.array([0.0,1.0])
     for example in neg_list:
         tree_stuff = tm.build_tree(example,label,vocab,W1,W2,b1,b2,Wlabel,normalized)
         tree_meanings = tree_stuff[1]
@@ -58,8 +58,65 @@ def full_grad(W1,b1,W2,b2,Wlabel,alpha,neg_list,pos_list,vocab,normalized):
     dV /= float(len(neg_list) + len(pos_list))
     return dW[:,:(2*d)],dW[:,(2*d)],dU[:,:d],dU[:,d],dV
 
-#def full_grad_full(W1,b1,W2,b2,Wlabel,lam_reg,alpha,neg_list,pos_list,vocab,normalized):
-
+def full_grad_full(W1,b1,W2,b2,Wlabel,lam_reg,alpha,neg_list,pos_list,vocab,normalized):
+    #set up some functions for array manipulation
+    d = np.shape(W1)[0]
+    W = np.zeros((d,(2*d)+1))
+    W[:,:(2*d)] = W1
+    W[:,(2*d)] = b1
+    U = np.zeros((2*d,d+1))
+    U[:,:d] = W2
+    U[:,d] = b2
+    k = np.shape(Wlabel)[0]
+    V = np.zeros((k,d))
+    V[:,:d] = Wlabel
+    pars = (W,U,V)
+    
+    #set up arrays that will hold the derivatives
+    dW = np.zeros(np.shape(W))
+    dU = np.zeros(np.shape(U))
+    dV = np.zeros(np.shape(Wlabel))
+    dVocab = np.zeros(np.shape(vocab))
+    
+    #loop over neg_list
+    label = np.array([0.0,1.0])
+    for example in neg_list:
+        tree_stuff = tm.build_tree(example,label,vocab,W1,W2,b1,b2,Wlabel,normalized)
+        tree_meanings = tree_stuff[1]
+        treeinfo = tree_stuff[0]
+        #extra_ones = np.ones(np.shape(tree_meanings)[1])
+        #tree = np.vstack((tree_meanings,extra_ones))
+        Dlist = backprop_full(tree_meanings,treeinfo,label,pars,alpha,normalized)
+        dW+=Dlist[0]
+        dU+=Dlist[1]
+        dV+=Dlist[2]
+        dx = Dlist[3]
+        for i in range(len(example)):
+            voc_index = example[i]
+            dVocab[voc_index,:] += dx[i,:]
+        
+    #loop over pos_list
+    label = np.array([1.0,0.0])
+    for example in pos_list:
+        tree_stuff = tm.build_tree(example,label,vocab,W1,W2,b1,b2,Wlabel,normalized)
+        tree_meanings = tree_stuff[1]
+        treeinfo = tree_stuff[0]
+        #extra_ones = np.ones(np.shape(tree_meanings)[1])
+        #tree = np.vstack((tree_meanings,extra_ones))
+        Dlist = backprop_full(tree_meanings,treeinfo,label,pars,alpha,normalized)
+        dW+=Dlist[0]
+        dU+=Dlist[1]
+        dV+=Dlist[2]
+        dx = Dlist[3]
+        for i in range(len(example)):
+            voc_index = example[i]
+            dVocab[voc_index,:] += dx[i,:]
+    
+    #divide by size of training set
+    dW /= float(len(neg_list) + len(pos_list))
+    dU /= float(len(neg_list) + len(pos_list))
+    dV /= float(len(neg_list) + len(pos_list))
+    return dW[:,:(2*d)],dW[:,(2*d)],dU[:,:d],dU[:,d],dV
 
 def h_norenorm(x,W):
     return np.tanh(np.einsum('ij,j',W,x))
