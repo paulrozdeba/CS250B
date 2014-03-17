@@ -8,20 +8,8 @@ an estimate calculated using a central difference approximation.
 import numpy as np
 import matplotlib.pyplot as plt
 from backprop import backprop,backprop_full
-from training import full_j
+from training import full_j, compute_grad
 from dataproc import format_data
-
-def midpoint_grad(f, x, eps):
-    """
-    Calculates the midpoint approximation to the gradient for all directions.
-    
-    f - The function to take gradient of.
-    x - Current position.
-    eps - Step size.  Can either be a single number, or an array of the same
-          shape as x.
-    """
-    
-    return (f(x+eps) - f(x-eps)) / (2*eps)
 
 def main():
     D = 4
@@ -47,7 +35,7 @@ def main():
     
     # hyperparameters
     eps = 0.0001
-    lambda_reg = 0.1
+    lambda_reg = 0.0
     alpha = 0.2
     
     # get the data
@@ -56,6 +44,7 @@ def main():
     pos_list = pos_list[:1]
     vocab = np.random.randn(268810,D)
     
+    # calculate finite difference approximation to gradient
     numgrad = np.zeros(Np)
     for i in range(Np):
         print 'P ' + str(i)
@@ -67,8 +56,10 @@ def main():
                        vocab,normalized=True)
         allflat[i] += eps
         numgrad[i] = (fxpe - fxme)/(2.0*eps)
-    print numgrad
     
+    # now use backprop
+    bpgrad = compute_grad(allflat,D,L,lambda_reg,alpha,neg_list,pos_list,
+                          vocab,normalized=True)
 
 if __name__ == '__main__':
     main()

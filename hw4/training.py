@@ -1,6 +1,6 @@
 import numpy as np
 import tree_maker as tm
-#import backprop as bp
+import backprop as bp
 from scipy.optimize import fmin_l_bfgs_b
 
 def unfold(W1,b1,W2,b2,Wlabel):
