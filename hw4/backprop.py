@@ -92,7 +92,7 @@ def full_grad_full(W1,b1,W2,b2,Wlabel,alpha,neg_list,pos_list,vocab,normalized):
         dV+=Dlist[2]
         dx = Dlist[3]
         for i in range(len(example)):
-            voc_index = example[i]
+            voc_index = example[i] -1
             dVocab[voc_index,:] += dx[i,:]
         
     #loop over pos_list
@@ -109,7 +109,7 @@ def full_grad_full(W1,b1,W2,b2,Wlabel,alpha,neg_list,pos_list,vocab,normalized):
         dV+=Dlist[2]
         dx = Dlist[3]
         for i in range(len(example)):
-            voc_index = example[i]
+            voc_index = example[i] - 1
             dVocab[voc_index,:] += dx[i,:]
     
     #divide by size of training set
