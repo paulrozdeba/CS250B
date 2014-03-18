@@ -500,6 +500,8 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                 if cidx == treeinfo[treeinfo[cidx,2],1]:
                     isright = True
                 # are the children leaves?
+                leftLeaf = False
+                rightLeaf = False
                 if treeinfo[treeinfo[cidx,0],0] == (2*N-1):
                     leftLeaf = True
                 if treeinfo[treeinfo[cidx,1],0] == (2*N-1):
