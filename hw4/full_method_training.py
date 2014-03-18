@@ -49,5 +49,5 @@ def training_iterate(d,label_size,v_size,lam_reg,alpha,neg_train,pos_train,norma
     x0 = np.random.randn(parameter_size)
     myargs = (d,label_size,v_size,lam_reg,alpha,neg_train,pos_train,normalized)
     result =  fmin_l_bfgs_b(full_j,x0,fprime=compute_grad,args=myargs)
-    (W1,b1,W2,b2,Wlabel) = fold_up(d,label_size,result[0])
-    return W1,b1,W2,b2,Wlabel,result[1]
+    (W1,b1,W2,b2,Wlabel,vocab) = fold_up(d,label_size,v_size,result[0])
+    return W1,b1,W2,b2,Wlabel,vocab,result[1]
