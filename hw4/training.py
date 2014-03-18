@@ -3,6 +3,17 @@ import tree_maker as tm
 import backprop as bp
 from scipy.optimize import fmin_l_bfgs_b
 
+def make_lam(d,label_size,Wlam,Ulam,Vlam):
+    lam_reg = np.zeros((4*d*d) + (3*d) + (d*label_size))
+    start = 0
+    lam_reg[start:start + (2*d*d) + d] = Wlam
+    start += (2*d*d) + d
+    lam_reg[start:start + (2*d*d) + (2*d)] = Ulam
+    start += (2*d*d) + (2*d)
+    lam_reg[start:start + (d*label_size)] = Vlam
+    start += (d*label_size)
+    return lam_reg
+
 def unfold(W1,b1,W2,b2,Wlabel):
     return np.hstack((W1.flatten(),b1.flatten(),W2.flatten(),b2.flatten(),Wlabel.flatten()))
 
@@ -33,8 +44,8 @@ def full_j(flattened_array,d,label_size,lam_reg,alpha,neg_list,pos_list,vocab,no
     
     scale = 1.0/float(len(neg_list) + len(pos_list))
     (W1,b1,W2,b2,Wlabel) = fold_up(d,label_size,flattened_array)
-    big_j = np.linalg.norm(flattened_array)**2
-    big_j *= 0.5*lam_reg
+    big_j = np.dot(lam_reg,flattened_array**2)
+    big_j *= 0.5
     (whole_rec,whole_pred) = tm.whole_error(neg_list,pos_list,vocab,W1,b1,W2,b2,Wlabel,normalized)
     big_j += scale*((alpha*whole_rec)+((1.0-alpha)*whole_pred))
     return big_j
