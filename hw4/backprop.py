@@ -58,7 +58,7 @@ def full_grad(W1,b1,W2,b2,Wlabel,alpha,neg_list,pos_list,vocab,normalized):
     dV /= float(len(neg_list) + len(pos_list))
     return dW[:,:(2*d)],dW[:,(2*d)],dU[:,:d],dU[:,d],dV
 
-def full_grad_full(W1,b1,W2,b2,Wlabel,lam_reg,alpha,neg_list,pos_list,vocab,normalized):
+def full_grad_full(W1,b1,W2,b2,Wlabel,alpha,neg_list,pos_list,vocab,normalized):
     #set up some functions for array manipulation
     d = np.shape(W1)[0]
     W = np.zeros((d,(2*d)+1))
@@ -547,9 +547,9 @@ def backprop_core_full(tree, treeinfo, t, h, Dh, g, Dg, pars, alpha=0.2):
                           np.einsum('ij,j',Wleft,c_deltax2)
                     Dx[lchild2_idx] += Dx1 + Dx2
                 if rightLeaf == True:
-                    Dx1 = alpha * np.einsum('ij,j',Wright[:,:-1],c_deltax1)
+                    Dx1 = alpha * np.einsum('ij,j',Wright,c_deltax1)
                     Dx2 = (1.0-alpha) * \
-                          np.einsum('ij,j',Wright[:,:-1],c_deltax2)
+                          np.einsum('ij,j',Wright,c_deltax2)
                     Dx[rchild2_idx] += Dx1 + Dx2
             
             # If you've reached this point, you've look at all the children of
