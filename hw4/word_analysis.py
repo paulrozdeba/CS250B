@@ -7,7 +7,7 @@ def word_ranks(vocab,Wlabel):
     score_list = []
     meaning_list = []
     word_list = []
-    for i in range(v_size):
+    for i in range(1,v_size):
         label = tm.make_d(vocab[i,:],Wlabel)
         score_list.append(math.log(label[0]/label[1]))
         meaning_list.append(vocab[i,:])
